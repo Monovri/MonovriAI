@@ -176,6 +176,106 @@ async function handleRegenerateContent(env, cors) {
   return jsonResponse(fresh, 200, cors);
 }
 
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return result === 0;
+}
+
+async function verifyStripeSignature(payload, sigHeader, secret) {
+  if (!sigHeader) return false;
+  const parts = Object.fromEntries(
+    sigHeader.split(",").map((p) => p.split("=").map((s) => s.trim()))
+  );
+  const timestamp = parts.t;
+  const expectedSig = parts.v1;
+  if (!timestamp || !expectedSig) return false;
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sigBuffer = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(`${timestamp}.${payload}`)
+  );
+  const computedSig = [...new Uint8Array(sigBuffer)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return timingSafeEqual(computedSig, expectedSig);
+}
+
+async function sendResendEmail(env, { to, subject, html }) {
+  const res = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${env.RESEND_API_KEY}`,
+    },
+    body: JSON.stringify({
+      from: env.RESEND_FROM || "Monovri AI <onboarding@resend.dev>",
+      to: [to],
+      subject,
+      html,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Resend error ${res.status}: ${await res.text()}`);
+  }
+  return res.json();
+}
+
+async function handleStripeWebhook(request, env) {
+  const payload = await request.text();
+  const sig = request.headers.get("Stripe-Signature");
+
+  if (!env.STRIPE_WEBHOOK_SECRET) {
+    return new Response("Server misconfigured: missing STRIPE_WEBHOOK_SECRET", { status: 500 });
+  }
+
+  const valid = await verifyStripeSignature(payload, sig, env.STRIPE_WEBHOOK_SECRET);
+  if (!valid) {
+    return new Response("Invalid signature", { status: 400 });
+  }
+
+  let event;
+  try {
+    event = JSON.parse(payload);
+  } catch {
+    return new Response("Invalid JSON", { status: 400 });
+  }
+
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+    const email = session.customer_details?.email;
+    const name = session.customer_details?.name || "";
+
+    if (email && env.RESEND_API_KEY) {
+      try {
+        await sendResendEmail(env, {
+          to: email,
+          subject: "Willkommen bei Monovri AI 🎉",
+          html: `<p>Hi ${name || "there"},</p>
+<p>Danke für dein Abo bei <strong>Monovri AI</strong>! Deine Zahlung ist erfolgreich eingegangen.</p>
+<p>Unser Team meldet sich in Kürze mit den nächsten Schritten, um deinen KI-Agenten für dich einzurichten.</p>
+<p>Bei Fragen einfach auf diese E-Mail antworten.</p>
+<p>— Monovri AI</p>`,
+        });
+      } catch (e) {
+        console.error("Resend send failed:", e);
+      }
+    }
+  }
+
+  return new Response("ok", { status: 200 });
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -185,6 +285,10 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: cors });
+    }
+
+    if (url.pathname === "/stripe/webhook" && request.method === "POST") {
+      return handleStripeWebhook(request, env);
     }
 
     if (url.pathname === "/content/generate" && request.method === "GET") {
