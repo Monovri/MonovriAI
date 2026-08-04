@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monovri AI — Enterprise AI Automation</title>
+<meta name="description" content="Monovri AI builds autonomous AI systems for European businesses. AI Agents, Voice AI, Workflow Automation — live in 14 days.">
+<meta property="og:title" content="Monovri AI — Enterprise AI Automation">
+<meta property="og:description" content="We build AI systems that eliminate manual work, scale your operations and generate revenue — 24/7.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="ChatGPT_Image_3__Aug__2026__15_24_50.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#050505">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Monovri AI","description":"Enterprise AI Automation Agency for Europe","email":"monovri.agency@web.de","url":"https://monovri.ai","sameAs":["https://instagram.com/monovri_ai"]}</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#050505;
+  --ink2:#0a0a0a;
+  --ink3:#111116;
+  --surface:rgba(255,255,255,0.03);
+  --surface2:rgba(255,255,255,0.05);
+  --line:rgba(255,255,255,0.06);
+  --line2:rgba(255,255,255,0.1);
+  --gold:#F5A800;
+  --gold-light:#FFD166;
+  --gold-glow:rgba(245,168,0,0.15);
+  --gold-subtle:rgba(245,168,0,0.08);
+  --white:#FFFFFF;
+  --off-white:#F0EDE8;
+  --muted:#686868;
+  --muted2:#444;
+  --r:12px;--r-lg:20px;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+  --ease-out:cubic-bezier(0.4,0,0.2,1);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--white);overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;line-height:1}
+
+::selection{background:var(--gold);color:#000}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(245,168,0,0.3);border-radius:2px}
+
+/* ═══ NOISE TEXTURE ═══ */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.6}
+
+/* ═══ NAV ═══ */
+#nav{position:fixed;top:0;left:0;right:0;z-index:500;height:60px;display:flex;align-items:center;padding:0 32px;transition:background 0.5s var(--ease-out),border-color 0.5s}
+#nav.scrolled{background:rgba(5,5,5,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--line)}
+.nav-l{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--white);font-size:15px;font-weight:700;letter-spacing:-0.03em;flex-shrink:0}
+.nav-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(245,168,0,0.4)}
+.nav-m{flex:1;display:flex;justify-content:center;gap:2px;list-style:none}
+.nav-m a{color:var(--muted);font-size:13px;font-weight:500;text-decoration:none;padding:5px 12px;border-radius:7px;transition:color 0.2s,background 0.2s;letter-spacing:-0.01em}
+.nav-m a:hover{color:var(--white);background:var(--surface2)}
+.nav-r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang-toggle{background:none;border:1px solid var(--line2);color:var(--muted);font:600 11px/1 'Inter',sans-serif;padding:5px 9px;border-radius:6px;cursor:pointer;letter-spacing:0.03em;transition:border-color 0.2s,color 0.2s}
+.lang-toggle:hover{border-color:rgba(245,168,0,0.4);color:var(--gold)}
+.cta-pill{background:var(--gold);color:#000;font:700 13px/1 'Inter',sans-serif;padding:9px 18px;border-radius:8px;text-decoration:none;transition:box-shadow 0.25s,transform 0.2s;letter-spacing:-0.01em;white-space:nowrap}
+.cta-pill:hover{box-shadow:0 0 0 4px rgba(245,168,0,0.2),0 8px 24px rgba(245,168,0,0.3);transform:translateY(-1px)}
+.hbg{display:none;flex-direction:column;gap:4px;cursor:pointer;padding:6px;background:none;border:none}
+.hbg b{display:block;width:20px;height:1.5px;background:var(--white);border-radius:1px;transition:transform 0.3s var(--ease),opacity 0.2s}
+
+/* ═══ LANG DROPDOWN ═══ */
+.lang-drop{position:fixed;top:68px;right:32px;background:rgba(12,12,12,0.97);border:1px solid var(--line2);border-radius:var(--r-lg);padding:12px;z-index:600;display:none;grid-template-columns:1fr 1fr;gap:4px;width:240px;backdrop-filter:blur(24px)}
+.lang-drop.open{display:grid}
+.l-opt{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;border:none;background:none;color:var(--muted);font:500 12px/1 'Inter',sans-serif;width:100%;text-align:left;transition:background 0.15s,color 0.15s}
+.l-opt:hover,.l-opt.on{background:var(--gold-subtle);color:var(--white)}
+.l-flag{font-size:16px;line-height:1}
+
+/* ═══ MOBILE MENU ═══ */
+.mob-menu{display:none;position:fixed;inset:0;top:60px;background:rgba(5,5,5,0.98);backdrop-filter:blur(32px);z-index:490;flex-direction:column;align-items:center;justify-content:center;gap:36px}
+.mob-menu.open{display:flex}
+.mob-menu a{color:var(--white);font-size:28px;font-weight:800;text-decoration:none;letter-spacing:-0.04em;transition:color 0.2s}
+.mob-menu a:hover{color:var(--gold)}
+
+/* ═══ HERO ═══ */
+.hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px 64px;position:relative;z-index:1;overflow:hidden}
+.hero-radial{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:900px;height:600px;background:radial-gradient(ellipse at center,rgba(245,168,0,0.06) 0%,transparent 60%);pointer-events:none}
+.hero-radial2{position:absolute;top:60%;left:20%;width:500px;height:500px;background:radial-gradient(ellipse,rgba(100,120,255,0.04) 0%,transparent 65%);pointer-events:none}
+.mascot-zone{position:relative;display:inline-flex;align-items:center;justify-content:center;margin-bottom:48px;width:148px;height:148px}
+.mascot-ring-1{position:absolute;inset:-18px;border-radius:50%;border:1px solid rgba(245,168,0,0.12);animation:rot 16s linear infinite}
+.mascot-ring-2{position:absolute;inset:-34px;border-radius:50%;border:1px solid rgba(245,168,0,0.06);animation:rot 28s linear infinite reverse}
+@keyframes rot{to{transform:rotate(360deg)}}
+.mascot-node{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);top:0;left:50%;margin-left:-4.5px;box-shadow:0 0 16px var(--gold),0 0 32px rgba(245,168,0,0.4)}
+.mascot-node2{position:absolute;width:6px;height:6px;border-radius:50%;background:#8B8FFF;bottom:0;left:50%;margin-left:-3px;box-shadow:0 0 12px #8B8FFF}
+.mascot-img{width:140px;height:140px;border-radius:50%;object-fit:cover;animation:breathe 6s ease-in-out infinite;position:relative;z-index:2;border:1.5px solid rgba(245,168,0,0.3);box-shadow:0 0 48px rgba(245,168,0,0.12),0 32px 80px rgba(0,0,0,0.6)}
+@keyframes breathe{0%,100%{transform:scale(1) translateY(0)}50%{transform:scale(1.02) translateY(-6px)}}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(245,168,0,0.2);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:600;color:rgba(245,168,0,0.85);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:32px;background:rgba(245,168,0,0.04)}
+.eyebrow-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 8px var(--gold)}50%{opacity:0.4;box-shadow:none}}
+.hero h1{font-size:clamp(52px,8vw,104px);font-weight:900;letter-spacing:-0.055em;line-height:0.92;margin-bottom:32px;position:relative}
+.h1-plain{display:block;color:var(--white)}
+.h1-gold{display:block;background:linear-gradient(110deg,#F5A800 0%,#FFD166 45%,#F5A800 100%);background-size:200% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s ease-in-out infinite}
+@keyframes shimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.hero-lead{font-size:clamp(16px,2vw,20px);color:var(--muted);max-width:560px;margin:0 auto 52px;line-height:1.65;font-weight:400;letter-spacing:-0.01em}
+.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:72px}
+.btn-a{background:var(--gold);color:#000;font:700 15px/1 'Inter',sans-serif;padding:17px 32px;border-radius:10px;text-decoration:none;letter-spacing:-0.02em;transition:box-shadow 0.25s,transform 0.2s;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;font-family:inherit}
+.btn-a:hover{box-shadow:0 0 0 4px rgba(245,168,0,0.18),0 12px 32px rgba(245,168,0,0.35);transform:translateY(-2px)}
+.btn-b{background:none;color:var(--white);font:500 15px/1 'Inter',sans-serif;padding:17px 32px;border-radius:10px;text-decoration:none;letter-spacing:-0.01em;border:1px solid var(--line2);transition:border-color 0.2s,background 0.2s,color 0.2s;display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit}
+.btn-b:hover{border-color:rgba(245,168,0,0.3);background:rgba(245,168,0,0.04);color:var(--gold)}
+.hero-proof{display:flex;gap:48px;justify-content:center;flex-wrap:wrap}
+.proof-item{text-align:center}
+.proof-num{font-size:30px;font-weight:900;letter-spacing:-0.05em;color:var(--white);line-height:1}
+.proof-sub{font-size:12px;color:var(--muted);margin-top:4px;font-weight:500;letter-spacing:0.01em}
+.proof-div{width:1px;background:var(--line2);align-self:stretch}
+
+/* ═══ TICKER ═══ */
+.ticker{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:18px 0;overflow:hidden;position:relative;z-index:1}
+.ticker-track{display:flex;gap:56px;animation:tick 28s linear infinite;width:max-content}
+.ticker-track:hover{animation-play-state:paused}
+.ticker-item{font-size:12px;font-weight:600;color:var(--muted2);letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:10px}
+.ticker-sep{width:3px;height:3px;border-radius:50%;background:var(--gold);opacity:0.5}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ═══ COMMON SECTION ═══ */
+.wrap{max-width:1180px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
+.sec{padding:120px 0;position:relative;z-index:1}
+.sec-alt{background:var(--ink2)}
+.sec-alt::before,.sec-alt::after{content:'';position:absolute;left:0;right:0;height:1px;background:var(--line)}
+.sec-alt::before{top:0}.sec-alt::after{bottom:0}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.eyebrow::after{content:'';flex:1;max-width:40px;height:1px;background:var(--gold);opacity:0.4}
+.sec-h{font-size:clamp(32px,4.5vw,56px);font-weight:800;letter-spacing:-0.045em;line-height:1.02;margin-bottom:20px;color:var(--white)}
+.sec-h em{font-style:normal;background:linear-gradient(120deg,#F5A800,#FFD166);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sec-p{font-size:17px;color:var(--muted);line-height:1.7;font-weight:400;letter-spacing:-0.005em;max-width:520px}
+
+/* ═══ WHY ═══ */
+.why-row{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:80px}
+.why-list{display:flex;flex-direction:column;gap:0}
+.why-item{padding:28px 0;border-bottom:1px solid var(--line);display:flex;gap:20px;align-items:flex-start;cursor:default;transition:background 0.2s}
+.why-item:first-child{border-top:1px solid var(--line)}
+.why-n{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:0.08em;padding-top:3px;flex-shrink:0;width:28px}
+.why-body{}
+.why-t{font-size:16px;font-weight:700;letter-spacing:-0.02em;margin-bottom:7px}
+.why-d{font-size:14px;color:var(--muted);line-height:1.65}
+.why-visual{border-radius:var(--r-lg);background:var(--ink3);border:1px solid var(--line);overflow:hidden;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;position:relative}
+.why-vis-inner{text-align:center;padding:40px}
+.why-vis-img{width:120px;height:120px;border-radius:50%;object-fit:cover;border:2px solid rgba(245,168,0,0.3);box-shadow:0 0 48px rgba(245,168,0,0.15);margin:0 auto 24px;display:block;animation:breathe 6s ease-in-out infinite}
+.why-vis-text{font-size:15px;font-weight:600;color:var(--white);letter-spacing:-0.02em;margin-bottom:8px}
+.why-vis-sub{font-size:13px;color:var(--muted)}
+.vis-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(245,168,0,0.1);border:1px solid rgba(245,168,0,0.2);border-radius:100px;padding:6px 14px;font-size:12px;color:var(--gold-light);font-weight:600;margin-top:24px}
+
+/* ═══ SERVICES ═══ */
+.svc-head{display:grid;grid-template-columns:1fr auto;align-items:end;gap:32px;margin-bottom:56px}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line)}
+.svc-card{background:var(--ink);padding:36px 32px;transition:background 0.25s;position:relative;overflow:hidden;cursor:default}
+.svc-card:hover{background:var(--ink3)}
+.svc-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:transform 0.4s var(--ease);transform-origin:left}
+.svc-card:hover::after{transform:scaleX(1)}
+.svc-ico{font-size:26px;margin-bottom:20px;display:block;line-height:1}
+.svc-name{font-size:16px;font-weight:700;letter-spacing:-0.03em;margin-bottom:10px}
+.svc-txt{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.svc-pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);background:var(--gold-subtle);padding:3px 8px;border-radius:4px}
+
+/* ═══ PROCESS ═══ */
+.proc-timeline{margin-top:72px;display:flex;flex-direction:column;gap:0;max-width:720px}
+.proc-step{display:grid;grid-template-columns:56px 1fr;gap:24px;position:relative}
+.proc-step:not(:last-child)::before{content:'';position:absolute;left:27px;top:56px;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(245,168,0,0.3),transparent)}
+.proc-dot{width:56px;height:56px;border-radius:50%;border:1px solid rgba(245,168,0,0.25);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--gold);background:var(--ink);flex-shrink:0;position:relative;z-index:1}
+.proc-body{padding-bottom:52px}
+.proc-body:last-child{padding-bottom:0}
+.proc-t{font-size:17px;font-weight:700;letter-spacing:-0.03em;margin-bottom:8px;padding-top:14px}
+.proc-d{font-size:14px;color:var(--muted);line-height:1.7}
+
+/* ═══ NUMBERS ═══ */
+.nums-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;margin-top:72px}
+.num-cell{background:var(--ink);padding:48px 36px;text-align:center;transition:background 0.25s}
+.num-cell:hover{background:var(--ink3)}
+.num-val{font-size:56px;font-weight:900;letter-spacing:-0.055em;line-height:1;background:linear-gradient(135deg,var(--white) 30%,var(--gold-light));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.num-lbl{font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5;font-weight:400}
+
+/* ═══ INDUSTRIES ═══ */
+.ind-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:64px}
+.ind-card{padding:28px 24px;border:1px solid var(--line);border-radius:var(--r);transition:border-color 0.25s,background 0.25s;cursor:default}
+.ind-card:hover{border-color:rgba(245,168,0,0.25);background:var(--gold-subtle)}
+.ind-e{font-size:24px;margin-bottom:14px;display:block;line-height:1}
+.ind-t{font-size:14px;font-weight:700;letter-spacing:-0.02em;margin-bottom:6px}
+.ind-d{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ═══ INTEGRATIONS ═══ */
+.int-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:64px}
+.int-card{border:1px solid var(--line);border-radius:var(--r);padding:20px 12px;text-align:center;transition:border-color 0.2s,background 0.2s;cursor:default}
+.int-card:hover{border-color:rgba(245,168,0,0.2);background:var(--gold-subtle)}
+.int-e{font-size:22px;display:block;margin-bottom:8px;line-height:1}
+.int-n{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:0.02em}
+
+/* ═══ TESTIMONIALS ═══ */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:64px}
+.testi-card{border:1px solid var(--line);border-radius:var(--r-lg);padding:36px;transition:border-color 0.25s,background 0.25s;position:relative;overflow:hidden}
+.testi-card::before{content:'❝';position:absolute;top:20px;right:24px;font-size:64px;color:rgba(245,168,0,0.06);line-height:1;font-family:Georgia,serif}
+.testi-card:hover{border-color:rgba(245,168,0,0.15);background:rgba(245,168,0,0.02)}
+.testi-stars{color:var(--gold);font-size:12px;letter-spacing:3px;margin-bottom:18px}
+.testi-q{font-size:15px;color:#d4d4d4;line-height:1.75;margin-bottom:24px;font-weight:400;letter-spacing:-0.005em}
+.testi-a{display:flex;align-items:center;gap:12px}
+.testi-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#F5A800,#ff6900);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#000;flex-shrink:0}
+.testi-nm{font-size:13px;font-weight:700;letter-spacing:-0.01em}
+.testi-rl{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* ═══ FAQ ═══ */
+.faq-wrap{max-width:700px;margin-top:64px}
+.faq-item{border-bottom:1px solid var(--line)}
+.faq-btn{width:100%;background:none;border:none;color:var(--white);font:600 15px/1 'Inter',sans-serif;padding:22px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;cursor:pointer;text-align:left;letter-spacing:-0.01em;transition:color 0.2s}
+.faq-btn:hover{color:var(--gold)}
+.faq-chevron{flex-shrink:0;width:18px;height:18px;border-radius:50%;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold);transition:transform 0.3s var(--ease),border-color 0.2s}
+.faq-item.on .faq-chevron{transform:rotate(45deg);border-color:rgba(245,168,0,0.3)}
+.faq-ans{font-size:14px;color:var(--muted);line-height:1.75;padding:0 0 20px;display:none;letter-spacing:-0.005em}
+.faq-item.on .faq-ans{display:block}
+
+/* ═══ CASE STUDY PLACEHOLDER ═══ */
+.case-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:64px}
+.case-card{border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;transition:border-color 0.25s}
+.case-card:hover{border-color:rgba(245,168,0,0.2)}
+.case-top{background:var(--ink3);padding:40px 36px;display:flex;flex-direction:column;gap:16px;min-height:200px;justify-content:flex-end}
+.case-tag{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);background:var(--gold-subtle);padding:4px 10px;border-radius:5px;width:fit-content}
+.case-t{font-size:20px;font-weight:800;letter-spacing:-0.03em;line-height:1.2}
+.case-sub{font-size:13px;color:var(--muted)}
+.case-bottom{padding:28px 36px;display:flex;gap:32px;border-top:1px solid var(--line);flex-wrap:wrap}
+.case-stat-n{font-size:28px;font-weight:900;letter-spacing:-0.04em;color:var(--gold)}
+.case-stat-l{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ═══ CTA ═══ */
+.cta-sec{padding:140px 32px;text-align:center;position:relative;overflow:hidden;z-index:1}
+.cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(245,168,0,0.07) 0%,transparent 60%);pointer-events:none}
+.cta-mascot{width:80px;height:80px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(245,168,0,0.35);box-shadow:0 0 40px rgba(245,168,0,0.15);margin:0 auto 36px;display:block;position:relative;animation:breathe 6s ease-in-out infinite}
+.cta-h{font-size:clamp(36px,6vw,80px);font-weight:900;letter-spacing:-0.055em;line-height:0.95;margin-bottom:24px;position:relative}
+.cta-p{font-size:18px;color:var(--muted);margin-bottom:44px;position:relative;letter-spacing:-0.01em;line-height:1.65}
+.cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;margin-bottom:28px}
+.cta-note{font-size:13px;color:var(--muted2);position:relative}
+.cta-note a{color:var(--muted);text-decoration:none;transition:color 0.2s}
+.cta-note a:hover{color:var(--gold)}
+
+/* ═══ FOOTER ═══ */
+footer{border-top:1px solid var(--line);padding:64px 32px 40px;position:relative;z-index:1}
+.ft-inner{max-width:1180px;margin:0 auto}
+.ft-top{display:grid;grid-template-columns:300px 1fr 1fr 1fr;gap:48px;margin-bottom:56px}
+.ft-brand{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:700;letter-spacing:-0.03em;margin-bottom:14px}
+.ft-mascot{width:26px;height:26px;border-radius:50%;object-fit:cover}
+.ft-about{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.ft-social{display:flex;gap:8px}
+.ft-soc{width:32px;height:32px;border-radius:7px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:13px;text-decoration:none;transition:border-color 0.2s,background 0.2s}
+.ft-soc:hover{border-color:rgba(245,168,0,0.3);background:var(--gold-subtle)}
+.ft-col h5{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:18px}
+.ft-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ft-col a{font-size:13px;color:var(--muted);text-decoration:none;transition:color 0.2s;letter-spacing:-0.005em}
+.ft-col a:hover{color:var(--white)}
+.ft-bot{border-top:1px solid var(--line);padding-top:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.ft-bot p,.ft-bot a{font-size:12px;color:var(--muted2);text-decoration:none;letter-spacing:-0.005em}
+.ft-bot a:hover{color:var(--muted)}
+
+/* ═══ REVEAL ═══ */
+.r{opacity:0;transform:translateY(24px);transition:opacity 0.8s var(--ease),transform 0.8s var(--ease)}
+.r.d1{transition-delay:0.08s}.r.d2{transition-delay:0.16s}.r.d3{transition-delay:0.24s}.r.d4{transition-delay:0.32s}
+.r.vis{opacity:1;transform:translateY(0)}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:1024px){
+  .svc-grid{grid-template-columns:repeat(2,1fr)}
+  .nums-grid{grid-template-columns:repeat(2,1fr)}
+  .why-row{grid-template-columns:1fr;gap:48px}
+  .why-visual{aspect-ratio:16/9}
+  .ind-grid{grid-template-columns:repeat(2,1fr)}
+  .int-grid{grid-template-columns:repeat(4,1fr)}
+  .testi-grid{grid-template-columns:1fr 1fr}
+  .case-grid{grid-template-columns:1fr}
+  .ft-top{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  #nav{padding:0 20px}
+  .nav-m,.lang-toggle{display:none}
+  .hbg{display:flex}
+  .nav-r .cta-pill{font-size:12px;padding:8px 14px}
+  .sec{padding:80px 0}
+  .wrap{padding:0 20px}
+  .svc-grid{grid-template-columns:1fr}
+  .svc-head{grid-template-columns:1fr}
+  .nums-grid{grid-template-columns:repeat(2,1fr)}
+  .ind-grid{grid-template-columns:repeat(2,1fr)}
+  .int-grid{grid-template-columns:repeat(3,1fr)}
+  .testi-grid{grid-template-columns:1fr}
+  .case-grid{grid-template-columns:1fr}
+  .ft-top{grid-template-columns:1fr;gap:32px}
+  .ft-bot{flex-direction:column;align-items:flex-start;gap:8px}
+  .hero-proof{gap:28px}
+  .lang-drop{right:20px;left:20px;width:auto}
+  .proc-timeline{max-width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- LANG PANEL -->
+<div class="lang-drop" id="langDrop">
+  <button class="l-opt on" onclick="setL('en')"><span class="l-flag">🇺🇸</span>English</button>
+  <button class="l-opt" onclick="setL('de')"><span class="l-flag">🇩🇪</span>Deutsch</button>
+  <button class="l-opt" onclick="setL('fr')"><span class="l-flag">🇫🇷</span>Français</button>
+  <button class="l-opt" onclick="setL('es')"><span class="l-flag">🇪🇸</span>Español</button>
+  <button class="l-opt" onclick="setL('it')"><span class="l-flag">🇮🇹</span>Italiano</button>
+  <button class="l-opt" onclick="setL('pt')"><span class="l-flag">🇵🇹</span>Português</button>
+  <button class="l-opt" onclick="setL('nl')"><span class="l-flag">🇳🇱</span>Nederlands</button>
+  <button class="l-opt" onclick="setL('pl')"><span class="l-flag">🇵🇱</span>Polski</button>
+  <button class="l-opt" onclick="setL('tr')"><span class="l-flag">🇹🇷</span>Türkçe</button>
+  <button class="l-opt" onclick="setL('ar')"><span class="l-flag">🇸🇦</span>العربية</button>
+  <button class="l-opt" onclick="setL('zh')"><span class="l-flag">🇨🇳</span>中文</button>
+  <button class="l-opt" onclick="setL('ja')"><span class="l-flag">🇯🇵</span>日本語</button>
+  <button class="l-opt" onclick="setL('ko')"><span class="l-flag">🇰🇷</span>한국어</button>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-l" aria-label="Monovri AI">
+    <img src="ChatGPT_Image_3__Aug__2026__15_24_50.png" class="nav-avatar" alt="Monovri AI" onerror="this.style.display='none'">
+    Monovri AI
+  </a>
+  <ul class="nav-m">
+    <li><a href="#why" data-t="nav.why">Why Us</a></li>
+    <li><a href="#services" data-t="nav.svc">Services</a></li>
+    <li><a href="#process" data-t="nav.proc">Process</a></li>
+    <li><a href="#cases" data-t="nav.cases">Case Studies</a></li>
+    <li><a href="#faq" data-t="nav.faq">FAQ</a></li>
+  </ul>
+  <div class="nav-r">
+    <button class="lang-toggle" id="ltgl" aria-label="Language">🌐 EN</button>
+    <a href="mailto:monovri.agency@web.de" class="cta-pill" data-t="nav.cta">Book a Call</a>
+    <button class="hbg" id="hbg" aria-label="Menu"><b></b><b></b><b></b></button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mob-menu" id="mobMenu">
+  <a href="#why" onclick="closeMenu()" data-t="nav.why">Why Us</a>
+  <a href="#services" onclick="closeMenu()" data-t="nav.svc">Services</a>
+  <a href="#process" onclick="closeMenu()" data-t="nav.proc">Process</a>
+  <a href="#cases" onclick="closeMenu()" data-t="nav.cases">Case Studies</a>
+  <a href="#faq" onclick="closeMenu()" data-t="nav.faq">FAQ</a>
+  <a href="mailto:monovri.agency@web.de" style="color:var(--gold)" data-t="nav.cta">Book a Call</a>
+</div>
+
+<main>
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-radial"></div>
+  <div class="hero-radial2"></div>
+  <div class="mascot-zone">
+    <div class="mascot-ring-1"><div class="mascot-node"></div></div>
+    <div class="mascot-ring-2"><div class="mascot-node2"></div></div>
+    <img src="ChatGPT_Image_3__Aug__2026__15_24_50.png" class="mascot-img" alt="Monovri AI" onerror="this.style.background='#F5A800'">
+  </div>
+  <div class="hero-eyebrow">
+    <span class="eyebrow-dot"></span>
+    <span data-t="hero.eyebrow">AI Automation — Europe</span>
+  </div>
+  <h1>
+    <span class="h1-plain" data-t="hero.l1">Your Business,</span>
+    <span class="h1-gold" data-t="hero.l2">Automated.</span>
+    <span class="h1-plain" data-t="hero.l3">Scaled.</span>
+  </h1>
+  <p class="hero-lead" data-t="hero.lead">We build autonomous AI systems that eliminate manual work, scale your operations and generate revenue — 24 hours a day, 7 days a week.</p>
+  <div class="hero-actions">
+    <a href="mailto:monovri.agency@web.de" class="btn-a" data-t="hero.cta1">Book Strategy Call →</a>
+    <a href="#services" class="btn-b" data-t="hero.cta2">Explore Services</a>
+  </div>
+  <div class="hero-proof">
+    <div class="proof-item"><div class="proof-num">80%</div><div class="proof-sub" data-t="hero.p1">Less manual work</div></div>
+    <div class="proof-div"></div>
+    <div class="proof-item"><div class="proof-num">14</div><div class="proof-sub" data-t="hero.p2">Days to go live</div></div>
+    <div class="proof-div"></div>
+    <div class="proof-item"><div class="proof-num">3×</div><div class="proof-sub" data-t="hero.p3">More capacity</div></div>
+    <div class="proof-div"></div>
+    <div class="proof-item"><div class="proof-num">24/7</div><div class="proof-sub" data-t="hero.p4">AI never stops</div></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">E-Commerce<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Healthcare<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Real Estate<span class="ticker-sep"></span></span>
+    <span class="ticker-item">SaaS<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Law Firms<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Agencies<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Coaching<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Hospitality<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Finance<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Logistics<span class="ticker-sep"></span></span>
+    <span class="ticker-item">E-Commerce<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Healthcare<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Real Estate<span class="ticker-sep"></span></span>
+    <span class="ticker-item">SaaS<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Law Firms<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Agencies<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Coaching<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Hospitality<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Finance<span class="ticker-sep"></span></span>
+    <span class="ticker-item">Logistics<span class="ticker-sep"></span></span>
+  </div>
+</div>
+
+<!-- ═══ WHY US ═══ -->
+<section class="sec" id="why">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="why.eyebrow">Why Monovri AI</div>
+    <h2 class="sec-h r d1"><span data-t="why.h1">Not an agency.</span><br><em data-t="why.h2">A technology partner.</em></h2>
+    <div class="why-row">
+      <div class="why-list">
+        <div class="why-item r d1">
+          <div class="why-n">01</div>
+          <div class="why-body"><div class="why-t" data-t="why.t1">Speed over planning</div><div class="why-d" data-t="why.d1">Your first AI system is live within 14 days — tested, integrated and running in production. Not stuck in endless meetings.</div></div>
+        </div>
+        <div class="why-item r d2">
+          <div class="why-n">02</div>
+          <div class="why-body"><div class="why-t" data-t="why.t2">Built for your business</div><div class="why-d" data-t="why.d2">Every system is custom-engineered for your workflows, your tools and your team. No templates. No compromises.</div></div>
+        </div>
+        <div class="why-item r d3">
+          <div class="why-n">03</div>
+          <div class="why-body"><div class="why-t" data-t="why.t3">ROI from day one</div><div class="why-d" data-t="why.d3">We measure outcomes in revenue generated, hours saved and leads closed — not in features shipped or code written.</div></div>
+        </div>
+        <div class="why-item r d4">
+          <div class="why-n">04</div>
+          <div class="why-body"><div class="why-t" data-t="why.t4">Transparent always</div><div class="why-d" data-t="why.d4">Daily progress updates, full access to your systems and a dedicated point of contact. No black boxes.</div></div>
+        </div>
+      </div>
+      <div class="why-visual r d2">
+        <div class="why-vis-inner">
+          <img src="ChatGPT_Image_3__Aug__2026__15_24_50.png" class="why-vis-img" alt="Monovri AI" onerror="this.style.background='#F5A800'">
+          <div class="why-vis-text" data-t="why.vis.t">Your AI partner</div>
+          <div class="why-vis-sub" data-t="why.vis.s">Working 24/7 on your behalf</div>
+          <div class="vis-badge">
+            <span class="eyebrow-dot"></span>
+            <span data-t="why.vis.b">Systems live in 14 days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SERVICES ═══ -->
+<section class="sec sec-alt" id="services">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="svc.eyebrow">AI Solutions</div>
+    <div class="svc-head">
+      <div>
+        <h2 class="sec-h r d1"><em data-t="svc.h1">Intelligent systems</em><br><span data-t="svc.h2">for every workflow</span></h2>
+        <p class="sec-p r d2" data-t="svc.p">From autonomous agents to voice AI — we build the systems that eliminate your most expensive bottlenecks.</p>
+      </div>
+      <a href="mailto:monovri.agency@web.de" class="btn-a r d3" data-t="svc.cta">Free Audit →</a>
+    </div>
+    <div class="svc-grid r">
+      <div class="svc-card"><span class="svc-ico">🤖</span><div class="svc-name" data-t="s1">AI Agents</div><p class="svc-txt" data-t="s1d">Autonomous AI that thinks, decides and executes tasks — 24/7, without supervision.</p><span class="svc-pill">Autonomous</span></div>
+      <div class="svc-card"><span class="svc-ico">🎙️</span><div class="svc-name" data-t="s2">Voice AI</div><p class="svc-txt" data-t="s2d">Human-like voice that handles inbound calls, qualifies leads and books appointments automatically.</p><span class="svc-pill">Conversational</span></div>
+      <div class="svc-card"><span class="svc-ico">📞</span><div class="svc-name" data-t="s3">AI Receptionist</div><p class="svc-txt" data-t="s3d">A virtual receptionist available 24/7 — routes, schedules and handles your incoming inquiries.</p><span class="svc-pill">Always On</span></div>
+      <div class="svc-card"><span class="svc-ico">💬</span><div class="svc-name" data-t="s4">AI Chatbots</div><p class="svc-txt" data-t="s4d">Trained on your data — intelligent chat for website, WhatsApp and Telegram.</p><span class="svc-pill">Multi-channel</span></div>
+      <div class="svc-card"><span class="svc-ico">⚙️</span><div class="svc-name" data-t="s5">Workflow Automation</div><p class="svc-txt" data-t="s5d">Connect every tool. Eliminate every repetitive task. Zero manual effort with n8n & Make.com.</p><span class="svc-pill">n8n · Make</span></div>
+      <div class="svc-card"><span class="svc-ico">📊</span><div class="svc-name" data-t="s6">CRM Automation</div><p class="svc-txt" data-t="s6d">Auto-score leads, trigger follow-ups and close more deals — entirely on autopilot.</p><span class="svc-pill">Sales</span></div>
+      <div class="svc-card"><span class="svc-ico">📧</span><div class="svc-name" data-t="s7">Email & WhatsApp AI</div><p class="svc-txt" data-t="s7d">Outreach sequences that feel personal — written by AI, refined by conversion data.</p><span class="svc-pill">Outreach</span></div>
+      <div class="svc-card"><span class="svc-ico">🎯</span><div class="svc-name" data-t="s8">Lead Generation AI</div><p class="svc-txt" data-t="s8d">AI systems that find, qualify and deliver sales-ready leads directly into your pipeline.</p><span class="svc-pill">Growth</span></div>
+      <div class="svc-card"><span class="svc-ico">🛠️</span><div class="svc-name" data-t="s9">Custom AI Software</div><p class="svc-txt" data-t="s9d">Proprietary AI applications built from scratch — dashboards, models, internal tools.</p><span class="svc-pill">Enterprise</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROCESS ═══ -->
+<section class="sec" id="process">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="proc.eyebrow">How It Works</div>
+    <h2 class="sec-h r d1"><span data-t="proc.h1">Live in</span> <em data-t="proc.h2">14 days.</em><br><span data-t="proc.h3">Every time.</span></h2>
+    <p class="sec-p r d2" data-t="proc.p">A battle-tested process that gets AI systems into production — without the typical agency chaos.</p>
+    <div class="proc-timeline">
+      <div class="proc-step r d1">
+        <div class="proc-dot">01</div>
+        <div class="proc-body"><div class="proc-t" data-t="p1t">Discovery Call — 30 min</div><p class="proc-d" data-t="p1d">We diagnose your biggest operational bottlenecks, map your tech stack and identify the highest-ROI automation opportunities for your business.</p></div>
+      </div>
+      <div class="proc-step r d2">
+        <div class="proc-dot">02</div>
+        <div class="proc-body"><div class="proc-t" data-t="p2t">Strategy & Blueprint — 48h</div><p class="proc-d" data-t="p2d">Custom AI architecture, tool selection, ROI projection and implementation roadmap. Delivered within 48 hours of your discovery call.</p></div>
+      </div>
+      <div class="proc-step r d3">
+        <div class="proc-dot">03</div>
+        <div class="proc-body"><div class="proc-t" data-t="p3t">Build & Integrate — 7–12 days</div><p class="proc-d" data-t="p3d">We engineer your AI systems, integrate with your existing tools and run exhaustive QA. Daily updates. Full transparency throughout.</p></div>
+      </div>
+      <div class="proc-step r d4">
+        <div class="proc-dot">04</div>
+        <div class="proc-body"><div class="proc-t" data-t="p4t">Launch & Optimize — Ongoing</div><p class="proc-d" data-t="p4d">Go live. We monitor performance, refine outputs and continuously optimize your systems as your business scales.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ NUMBERS ═══ -->
+<section class="sec sec-alt">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="num.eyebrow">By The Numbers</div>
+    <h2 class="sec-h r d1" data-t="num.h">The results speak</h2>
+    <div class="nums-grid">
+      <div class="num-cell r"><div class="num-val">80%</div><div class="num-lbl" data-t="n1">Reduction in manual work — on average, across all clients</div></div>
+      <div class="num-cell r d1"><div class="num-val">14</div><div class="num-lbl" data-t="n2">Days from first call to AI system live in production</div></div>
+      <div class="num-cell r d2"><div class="num-val">3×</div><div class="num-lbl" data-t="n3">Capacity increase achieved without hiring a single person</div></div>
+      <div class="num-cell r d3"><div class="num-val">24/7</div><div class="num-lbl" data-t="n4">AI systems running while you focus on strategy and growth</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CASE STUDIES ═══ -->
+<section class="sec" id="cases">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="case.eyebrow">Case Studies</div>
+    <h2 class="sec-h r d1"><em data-t="case.h1">Real results</em><br><span data-t="case.h2">for real businesses</span></h2>
+    <p class="sec-p r d2" data-t="case.p">A selection of transformations we've engineered for our clients.</p>
+    <div class="case-grid r d1">
+      <div class="case-card">
+        <div class="case-top" style="background:linear-gradient(135deg,#0f0f14,#1a1410)">
+          <span class="case-tag" data-t="c1.tag">E-Commerce · Germany</span>
+          <div class="case-t" data-t="c1.t">Full customer service automation for an online retailer with 50K+ monthly orders</div>
+          <div class="case-sub" data-t="c1.s">AI Chatbot + CRM Automation + Email Sequences</div>
+        </div>
+        <div class="case-bottom">
+          <div><div class="case-stat-n">78%</div><div class="case-stat-l" data-t="c1.l1">Tickets handled by AI</div></div>
+          <div><div class="case-stat-n">24h</div><div class="case-stat-l" data-t="c1.l2">Implementation time</div></div>
+          <div><div class="case-stat-n">€40K</div><div class="case-stat-l" data-t="c1.l3">Monthly savings</div></div>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-top" style="background:linear-gradient(135deg,#0d0f16,#0a140f)">
+          <span class="case-tag" data-t="c2.tag">Real Estate · Austria</span>
+          <div class="case-t" data-t="c2.t">AI-powered lead qualification and appointment booking for a property management firm</div>
+          <div class="case-sub" data-t="c2.s">Voice AI + Calendar AI + CRM Integration</div>
+        </div>
+        <div class="case-bottom">
+          <div><div class="case-stat-n">3×</div><div class="case-stat-l" data-t="c2.l1">More qualified leads</div></div>
+          <div><div class="case-stat-n">92%</div><div class="case-stat-l" data-t="c2.l2">Booking automation rate</div></div>
+          <div><div class="case-stat-n">14d</div><div class="case-stat-l" data-t="c2.l3">Time to deployment</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INDUSTRIES ═══ -->
+<section class="sec sec-alt" id="industries">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="ind.eyebrow">Industries</div>
+    <h2 class="sec-h r d1"><span data-t="ind.h1">AI for every</span> <em data-t="ind.h2">industry</em></h2>
+    <p class="sec-p r d2" data-t="ind.p">If you have repetitive processes, we have a solution. Monovri AI operates across all sectors.</p>
+    <div class="ind-grid">
+      <div class="ind-card r"><span class="ind-e">🛍️</span><div class="ind-t" data-t="i1">E-Commerce</div><p class="ind-d" data-t="i1d">Orders, returns, support, upsells</p></div>
+      <div class="ind-card r d1"><span class="ind-e">🏥</span><div class="ind-t" data-t="i2">Healthcare</div><p class="ind-d" data-t="i2d">Booking, reminders, patient comms</p></div>
+      <div class="ind-card r d2"><span class="ind-e">🏠</span><div class="ind-t" data-t="i3">Real Estate</div><p class="ind-d" data-t="i3d">Lead scoring, viewings, follow-up</p></div>
+      <div class="ind-card r d3"><span class="ind-e">⚖️</span><div class="ind-t" data-t="i4">Law Firms</div><p class="ind-d" data-t="i4d">Intake, documents, scheduling</p></div>
+      <div class="ind-card r"><span class="ind-e">📱</span><div class="ind-t" data-t="i5">SaaS</div><p class="ind-d" data-t="i5d">Onboarding, churn, support AI</p></div>
+      <div class="ind-card r d1"><span class="ind-e">🎓</span><div class="ind-t" data-t="i6">Education</div><p class="ind-d" data-t="i6d">Student bots, enrollment, tutoring</p></div>
+      <div class="ind-card r d2"><span class="ind-e">🏨</span><div class="ind-t" data-t="i7">Hospitality</div><p class="ind-d" data-t="i7d">Reservations, guest AI, reviews</p></div>
+      <div class="ind-card r d3"><span class="ind-e">💼</span><div class="ind-t" data-t="i8">Consulting</div><p class="ind-d" data-t="i8d">Lead gen, proposals, CRM flows</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INTEGRATIONS ═══ -->
+<section class="sec">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="int.eyebrow">Integrations</div>
+    <h2 class="sec-h r d1"><span data-t="int.h1">Connects with</span> <em data-t="int.h2">your existing stack</em></h2>
+    <p class="sec-p r d2" data-t="int.p">No rip-and-replace. Monovri AI integrates directly into the tools your team already uses.</p>
+    <div class="int-grid r d1">
+      <div class="int-card"><span class="int-e">🔧</span><div class="int-n">n8n</div></div>
+      <div class="int-card"><span class="int-e">⚡</span><div class="int-n">Make.com</div></div>
+      <div class="int-card"><span class="int-e">📊</span><div class="int-n">HubSpot</div></div>
+      <div class="int-card"><span class="int-e">💼</span><div class="int-n">Salesforce</div></div>
+      <div class="int-card"><span class="int-e">🛒</span><div class="int-n">Shopify</div></div>
+      <div class="int-card"><span class="int-e">📋</span><div class="int-n">Notion</div></div>
+      <div class="int-card"><span class="int-e">💬</span><div class="int-n">Slack</div></div>
+      <div class="int-card"><span class="int-e">📧</span><div class="int-n">Gmail</div></div>
+      <div class="int-card"><span class="int-e">📅</span><div class="int-n">Calendly</div></div>
+      <div class="int-card"><span class="int-e">🟢</span><div class="int-n">WhatsApp</div></div>
+      <div class="int-card"><span class="int-e">🗄️</span><div class="int-n">Airtable</div></div>
+      <div class="int-card"><span class="int-e">🔗</span><div class="int-n">Zapier</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONIALS ═══ -->
+<section class="sec sec-alt">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="testi.eyebrow">Testimonials</div>
+    <h2 class="sec-h r d1"><em data-t="testi.h1">Clients.</em> <span data-t="testi.h2">Not just customers.</span></h2>
+    <div class="testi-grid">
+      <div class="testi-card r">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-q" data-t="t1">"Monovri AI automated our entire onboarding flow. We save 20 hours a week — and quality improved dramatically."</p>
+        <div class="testi-a"><div class="testi-av">LM</div><div><div class="testi-nm" data-t="t1n">Laura M.</div><div class="testi-rl" data-t="t1r">Founder, SaaS Startup · Berlin</div></div></div>
+      </div>
+      <div class="testi-card r d1">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-q" data-t="t2">"Our AI chatbot generates qualified leads every single day. In 2 weeks they delivered what I'd been searching for years."</p>
+        <div class="testi-a"><div class="testi-av">MT</div><div><div class="testi-nm" data-t="t2n">Markus T.</div><div class="testi-rl" data-t="t2r">CEO, E-Commerce Agency · Munich</div></div></div>
+      </div>
+      <div class="testi-card r d2">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-q" data-t="t3">"CRM, Shopify, Email — everything runs automatically now. The ROI was visible within the first week."</p>
+        <div class="testi-a"><div class="testi-av">SK</div><div><div class="testi-nm" data-t="t3n">Sophia K.</div><div class="testi-rl" data-t="t3r">Entrepreneur · Cologne</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section class="sec" id="faq">
+  <div class="wrap">
+    <div class="eyebrow r" data-t="faq.eyebrow">FAQ</div>
+    <h2 class="sec-h r d1" data-t="faq.h">Every question. Answered.</h2>
+    <div class="faq-wrap r d2">
+      <div class="faq-item">
+        <button class="faq-btn" onclick="doFaq(this)"><span data-t="q1">How long does it take to deploy an AI system?</span><span class="faq-chevron">+</span></button>
+        <div class="faq-ans" data-t="a1">Most systems go live within 10–14 business days from the first call. Complex enterprise solutions may take up to 4 weeks. We always provide a concrete, realistic timeline in the discovery session.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="doFaq(this)"><span data-t="q2">Do I need technical expertise on my end?</span><span class="faq-chevron">+</span></button>
+        <div class="faq-ans" data-t="a2">None whatsoever. We handle the full stack — from strategy and architecture through to build, integration and deployment. Your only job is to share your goals and current pain points.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="doFaq(this)"><span data-t="q3">Which AI models and platforms do you use?</span><span class="faq-chevron">+</span></button>
+        <div class="faq-ans" data-t="a3">We work with OpenAI, Anthropic (Claude), Google Gemini and open-source models depending on your use case. For automation infrastructure we use n8n, Make.com and custom-built solutions. We always select the optimal stack for your specific requirements.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="doFaq(this)"><span data-t="q4">How is my data protected?</span><span class="faq-chevron">+</span></button>
+        <div class="faq-ans" data-t="a4">Data security is non-negotiable for us. All systems are built with full GDPR compliance, end-to-end encryption and strict access controls. We sign NDAs as standard and never use your business data to train external models.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="doFaq(this)"><span data-t="q5">What support do I get after launch?</span><span class="faq-chevron">+</span></button>
+        <div class="faq-ans" data-t="a5">We offer ongoing monitoring, optimization and support retainers. Your AI system is a living product — we continuously refine its performance as your business evolves. Most clients see measurable improvements in the first 30 days post-launch.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-btn" onclick="doFaq(this)"><span data-t="q6">What does it cost?</span><span class="faq-chevron">+</span></button>
+        <div class="faq-ans" data-t="a6">Every project is scoped individually based on complexity and required automation depth. We offer both project-based and retainer models. Book a free strategy call and we'll provide a detailed proposal within 24 hours — with no obligations.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta-sec" id="contact">
+  <div class="cta-glow"></div>
+  <img src="ChatGPT_Image_3__Aug__2026__15_24_50.png" class="cta-mascot r" alt="Monovri AI" onerror="this.style.display='none'">
+  <h2 class="cta-h r d1">
+    <span data-t="cta.l1">Ready to</span><br>
+    <span style="background:linear-gradient(110deg,#F5A800,#FFD166,#F5A800);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 4s ease-in-out infinite" data-t="cta.l2">automate?</span>
+  </h2>
+  <p class="cta-p r d2" data-t="cta.p">Book a free 30-minute Strategy Call. No pitch. No pressure. Just a clear plan for your business.</p>
+  <div class="cta-actions r d3">
+    <a href="mailto:monovri.agency@web.de" class="btn-a" data-t="cta.b1">Book Strategy Call →</a>
+    <a href="mailto:monovri.agency@web.de" class="btn-b" data-t="cta.b2">Send a Message</a>
+  </div>
+  <p class="cta-note r d4"><span data-t="cta.note">or email us directly at</span> <a href="mailto:monovri.agency@web.de">monovri.agency@web.de</a></p>
+</section>
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="ft-inner">
+    <div class="ft-top">
+      <div>
+        <div class="ft-brand">
+          <img src="ChatGPT_Image_3__Aug__2026__15_24_50.png" class="ft-mascot" alt="" onerror="this.style.display='none'">
+          Monovri AI
+        </div>
+        <p class="ft-about" data-t="ft.about">Europe's AI automation partner. We build intelligent systems that scale businesses without scaling headcount.</p>
+        <div class="ft-social">
+          <a href="https://instagram.com" target="_blank" rel="noopener" class="ft-soc" aria-label="Instagram">📸</a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener" class="ft-soc" aria-label="LinkedIn">💼</a>
+          <a href="mailto:monovri.agency@web.de" class="ft-soc" aria-label="Email">✉️</a>
+        </div>
+      </div>
+      <div class="ft-col">
+        <h5 data-t="ft.h1">Services</h5>
+        <ul>
+          <li><a href="#services" data-t="s1">AI Agents</a></li>
+          <li><a href="#services" data-t="s2">Voice AI</a></li>
+          <li><a href="#services" data-t="s3">AI Receptionist</a></li>
+          <li><a href="#services" data-t="s5">Workflow Automation</a></li>
+          <li><a href="#services" data-t="s8">Lead Generation AI</a></li>
+          <li><a href="#services" data-t="s9">Custom AI Software</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h5 data-t="ft.h2">Company</h5>
+        <ul>
+          <li><a href="#why" data-t="nav.why">Why Us</a></li>
+          <li><a href="#process" data-t="nav.proc">Process</a></li>
+          <li><a href="#cases" data-t="nav.cases">Case Studies</a></li>
+          <li><a href="#industries" data-t="ft.ind">Industries</a></li>
+          <li><a href="#faq" data-t="nav.faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h5 data-t="ft.h3">Contact</h5>
+        <ul>
+          <li><a href="mailto:monovri.agency@web.de">monovri.agency@web.de</a></li>
+          <li><a href="#contact" data-t="nav.cta">Book a Call</a></li>
+          <li><a href="#" data-t="ft.imprint">Imprint</a></li>
+          <li><a href="#" data-t="ft.privacy">Privacy Policy</a></li>
+          <li><a href="#" data-t="ft.gdpr">GDPR</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="ft-bot">
+      <p>© 2026 Monovri AI. <span data-t="ft.rights">All rights reserved.</span></p>
+      <p data-t="ft.made">Built with intelligence. Designed for results.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ═══ TRANSLATIONS ═══
+const LANGS = {
+en:{
+  "nav.why":"Why Us","nav.svc":"Services","nav.proc":"Process","nav.cases":"Case Studies","nav.faq":"FAQ","nav.cta":"Book a Call",
+  "hero.eyebrow":"AI Automation · Europe","hero.l1":"Your Business,","hero.l2":"Automated.","hero.l3":"Scaled.",
+  "hero.lead":"We build autonomous AI systems that eliminate manual work, scale your operations and generate revenue — 24 hours a day, 7 days a week.",
+  "hero.cta1":"Book Strategy Call →","hero.cta2":"Explore Services",
+  "hero.p1":"Less manual work","hero.p2":"Days to go live","hero.p3":"More capacity","hero.p4":"AI never stops",
+  "why.eyebrow":"Why Monovri AI","why.h1":"Not an agency.","why.h2":"A technology partner.",
+  "why.t1":"Speed over planning","why.d1":"Your first AI system is live within 14 days — tested, integrated and running in production. Not stuck in endless meetings.",
+  "why.t2":"Built for your business","why.d2":"Every system is custom-engineered for your workflows, your tools and your team. No templates. No compromises.",
+  "why.t3":"ROI from day one","why.d3":"We measure outcomes in revenue generated, hours saved and leads closed — not in features shipped or code written.",
+  "why.t4":"Transparent always","why.d4":"Daily progress updates, full access to your systems and a dedicated point of contact. No black boxes.",
+  "why.vis.t":"Your AI partner","why.vis.s":"Working 24/7 on your behalf","why.vis.b":"Systems live in 14 days",
+  "svc.eyebrow":"AI Solutions","svc.h1":"Intelligent systems","svc.h2":"for every workflow","svc.p":"From autonomous agents to voice AI — we build the systems that eliminate your most expensive bottlenecks.","svc.cta":"Free Audit →",
+  "s1":"AI Agents","s1d":"Autonomous AI that thinks, decides and executes tasks — 24/7, without supervision.",
+  "s2":"Voice AI","s2d":"Human-like voice that handles inbound calls, qualifies leads and books appointments automatically.",
+  "s3":"AI Receptionist","s3d":"A virtual receptionist available 24/7 — routes, schedules and handles your incoming inquiries.",
+  "s4":"AI Chatbots","s4d":"Trained on your data — intelligent chat for website, WhatsApp and Telegram.",
+  "s5":"Workflow Automation","s5d":"Connect every tool. Eliminate every repetitive task. Zero manual effort with n8n & Make.com.",
+  "s6":"CRM Automation","s6d":"Auto-score leads, trigger follow-ups and close more deals — entirely on autopilot.",
+  "s7":"Email & WhatsApp AI","s7d":"Outreach sequences that feel personal — written by AI, refined by conversion data.",
+  "s8":"Lead Generation AI","s8d":"AI systems that find, qualify and deliver sales-ready leads directly into your pipeline.",
+  "s9":"Custom AI Software","s9d":"Proprietary AI applications built from scratch — dashboards, models, internal tools.",
+  "proc.eyebrow":"How It Works","proc.h1":"Live in","proc.h2":"14 days.","proc.h3":"Every time.","proc.p":"A battle-tested process that gets AI systems into production — without the typical agency chaos.",
+  "p1t":"Discovery Call — 30 min","p1d":"We diagnose your biggest operational bottlenecks, map your tech stack and identify the highest-ROI automation opportunities for your business.",
+  "p2t":"Strategy & Blueprint — 48h","p2d":"Custom AI architecture, tool selection, ROI projection and implementation roadmap. Delivered within 48 hours of your discovery call.",
+  "p3t":"Build & Integrate — 7–12 days","p3d":"We engineer your AI systems, integrate with your existing tools and run exhaustive QA. Daily updates. Full transparency throughout.",
+  "p4t":"Launch & Optimize — Ongoing","p4d":"Go live. We monitor performance, refine outputs and continuously optimize your systems as your business scales.",
+  "num.eyebrow":"By The Numbers","num.h":"The results speak",
+  "n1":"Reduction in manual work — on average, across all clients",
+  "n2":"Days from first call to AI system live in production",
+  "n3":"Capacity increase achieved without hiring a single person",
+  "n4":"AI systems running while you focus on strategy and growth",
+  "case.eyebrow":"Case Studies","case.h1":"Real results","case.h2":"for real businesses","case.p":"A selection of transformations we've engineered for our clients.",
+  "c1.tag":"E-Commerce · Germany","c1.t":"Full customer service automation for an online retailer with 50K+ monthly orders","c1.s":"AI Chatbot + CRM Automation + Email Sequences","c1.l1":"Tickets handled by AI","c1.l2":"Implementation time","c1.l3":"Monthly savings",
+  "c2.tag":"Real Estate · Austria","c2.t":"AI-powered lead qualification and appointment booking for a property management firm","c2.s":"Voice AI + Calendar AI + CRM Integration","c2.l1":"More qualified leads","c2.l2":"Booking automation rate","c2.l3":"Time to deployment",
+  "ind.eyebrow":"Industries","ind.h1":"AI for every","ind.h2":"industry","ind.p":"If you have repetitive processes, we have a solution. Monovri AI operates across all sectors.",
+  "i1":"E-Commerce","i1d":"Orders, returns, support, upsells","i2":"Healthcare","i2d":"Booking, reminders, patient comms",
+  "i3":"Real Estate","i3d":"Lead scoring, viewings, follow-up","i4":"Law Firms","i4d":"Intake, documents, scheduling",
+  "i5":"SaaS","i5d":"Onboarding, churn, support AI","i6":"Education","i6d":"Student bots, enrollment, tutoring",
+  "i7":"Hospitality","i7d":"Reservations, guest AI, reviews","i8":"Consulting","i8d":"Lead gen, proposals, CRM flows",
+  "int.eyebrow":"Integrations","int.h1":"Connects with","int.h2":"your existing stack","int.p":"No rip-and-replace. Monovri AI integrates directly into the tools your team already uses.",
+  "testi.eyebrow":"Testimonials","testi.h1":"Clients.","testi.h2":"Not just customers.",
+  "t1":"\"Monovri AI automated our entire onboarding flow. We save 20 hours a week — and quality improved dramatically.\"","t1n":"Laura M.","t1r":"Founder, SaaS Startup · Berlin",
+  "t2":"\"Our AI chatbot generates qualified leads every single day. In 2 weeks they delivered what I'd been searching for years.\"","t2n":"Markus T.","t2r":"CEO, E-Commerce Agency · Munich",
+  "t3":"\"CRM, Shopify, Email — everything runs automatically now. The ROI was visible within the first week.\"","t3n":"Sophia K.","t3r":"Entrepreneur · Cologne",
+  "faq.eyebrow":"FAQ","faq.h":"Every question. Answered.",
+  "q1":"How long does it take to deploy an AI system?","a1":"Most systems go live within 10–14 business days from the first call. Complex enterprise solutions may take up to 4 weeks. We always provide a concrete, realistic timeline in the discovery session.",
+  "q2":"Do I need technical expertise on my end?","a2":"None whatsoever. We handle the full stack — from strategy and architecture through to build, integration and deployment. Your only job is to share your goals and current pain points.",
+  "q3":"Which AI models and platforms do you use?","a3":"We work with OpenAI, Anthropic (Claude), Google Gemini and open-source models depending on your use case. For automation infrastructure we use n8n, Make.com and custom-built solutions. We always select the optimal stack for your specific requirements.",
+  "q4":"How is my data protected?","a4":"Data security is non-negotiable for us. All systems are built with full GDPR compliance, end-to-end encryption and strict access controls. We sign NDAs as standard and never use your business data to train external models.",
+  "q5":"What support do I get after launch?","a5":"We offer ongoing monitoring, optimization and support retainers. Your AI system is a living product — we continuously refine its performance as your business evolves. Most clients see measurable improvements in the first 30 days post-launch.",
+  "q6":"What does it cost?","a6":"Every project is scoped individually based on complexity and required automation depth. We offer both project-based and retainer models. Book a free strategy call and we'll provide a detailed proposal within 24 hours — with no obligations.",
+  "cta.l1":"Ready to","cta.l2":"automate?","cta.p":"Book a free 30-minute Strategy Call. No pitch. No pressure. Just a clear plan for your business.","cta.b1":"Book Strategy Call →","cta.b2":"Send a Message","cta.note":"or email us directly at",
+  "ft.about":"Europe's AI automation partner. We build intelligent systems that scale businesses without scaling headcount.",
+  "ft.h1":"Services","ft.h2":"Company","ft.h3":"Contact","ft.ind":"Industries","ft.imprint":"Imprint","ft.privacy":"Privacy Policy","ft.gdpr":"GDPR","ft.rights":"All rights reserved.","ft.made":"Built with intelligence. Designed for results."
+},
+de:{
+  "nav.why":"Warum wir","nav.svc":"Leistungen","nav.proc":"Prozess","nav.cases":"Fallstudien","nav.faq":"FAQ","nav.cta":"Call buchen",
+  "hero.eyebrow":"KI-Automatisierung · Europa","hero.l1":"Dein Business,","hero.l2":"Automatisiert.","hero.l3":"Skaliert.",
+  "hero.lead":"Wir bauen autonome KI-Systeme, die manuelle Arbeit eliminieren, Prozesse skalieren und Umsatz generieren — 24 Stunden täglich, 7 Tage die Woche.",
+  "hero.cta1":"Strategy Call buchen →","hero.cta2":"Leistungen entdecken",
+  "hero.p1":"Weniger manuelle Arbeit","hero.p2":"Tage bis live","hero.p3":"Mehr Kapazität","hero.p4":"KI läuft immer",
+  "why.eyebrow":"Warum Monovri AI","why.h1":"Keine Agentur.","why.h2":"Ein Technologiepartner.",
+  "why.t1":"Geschwindigkeit vor Planung","why.d1":"Dein erstes KI-System geht innerhalb von 14 Tagen live — getestet, integriert und produktionsbereit. Kein endloses Planen.",
+  "why.t2":"Gebaut für dein Business","why.d2":"Jedes System wird individuell für deine Workflows, Tools und dein Team entwickelt. Keine Templates. Keine Kompromisse.",
+  "why.t3":"ROI ab Tag eins","why.d3":"Wir messen Erfolg in generiertem Umsatz, gesparten Stunden und abgeschlossenen Deals — nicht in Features oder Codezeilen.",
+  "why.t4":"Volle Transparenz","why.d4":"Tägliche Updates, vollständiger Systemzugriff und ein fester Ansprechpartner. Keine Black Boxes.",
+  "why.vis.t":"Dein KI-Partner","why.vis.s":"24/7 für dich im Einsatz","why.vis.b":"Systeme live in 14 Tagen",
+  "svc.eyebrow":"KI-Lösungen","svc.h1":"Intelligente Systeme","svc.h2":"für jeden Workflow","svc.p":"Von autonomen Agenten bis Voice AI — wir bauen die Systeme, die deine teuersten Engpässe eliminieren.","svc.cta":"Kostenloses Audit →",
+  "s1":"KI-Agenten","s1d":"Autonome KI, die denkt, entscheidet und Aufgaben ausführt — 24/7, ohne Überwachung.",
+  "s2":"Voice AI","s2d":"Menschenähnliche Sprach-KI für eingehende Anrufe, Lead-Qualifizierung und automatische Terminbuchung.",
+  "s3":"KI-Rezeptionist","s3d":"Ein virtueller Rezeptionist rund um die Uhr — leitet weiter, plant und bearbeitet Anfragen.",
+  "s4":"KI-Chatbots","s4d":"Auf deinen Daten trainiert — intelligenter Chat für Website, WhatsApp und Telegram.",
+  "s5":"Workflow-Automatisierung","s5d":"Alle Tools verbinden. Alle Routineaufgaben eliminieren. Null manueller Aufwand mit n8n & Make.com.",
+  "s6":"CRM-Automatisierung","s6d":"Leads automatisch bewerten, Follow-ups auslösen und mehr Deals abschließen — vollautomatisch.",
+  "s7":"E-Mail & WhatsApp KI","s7d":"Outreach-Sequenzen, die persönlich wirken — von KI verfasst, durch Daten optimiert.",
+  "s8":"Lead-Generierung KI","s8d":"KI-Systeme, die kaufbereite Leads finden, qualifizieren und direkt in deine Pipeline liefern.",
+  "s9":"Custom KI-Software","s9d":"Maßgeschneiderte KI-Anwendungen von Grund auf — eigene Modelle, Dashboards, interne Tools.",
+  "proc.eyebrow":"So läuft es ab","proc.h1":"Live in","proc.h2":"14 Tagen.","proc.h3":"Jedes Mal.","proc.p":"Ein bewährter Prozess, der KI-Systeme in die Produktion bringt — ohne das typische Agentur-Chaos.",
+  "p1t":"Discovery Call — 30 Min","p1d":"Wir analysieren deine größten operativen Engpässe, kartieren deinen Tech-Stack und identifizieren die Automatisierungsmöglichkeiten mit dem höchsten ROI.",
+  "p2t":"Strategie & Blueprint — 48 Std","p2d":"Individuelle KI-Architektur, Tool-Auswahl, ROI-Prognose und Implementierungsfahrplan. Innerhalb von 48 Stunden nach deinem Discovery Call geliefert.",
+  "p3t":"Build & Integration — 7–12 Tage","p3d":"Wir bauen deine KI-Systeme, integrieren sie in bestehende Tools und führen umfangreiche Tests durch. Tägliche Updates. Volle Transparenz.",
+  "p4t":"Launch & Optimierung — laufend","p4d":"Go live. Wir monitoren die Performance, verfeinern Outputs und optimieren deine Systeme kontinuierlich, während dein Business wächst.",
+  "num.eyebrow":"In Zahlen","num.h":"Die Ergebnisse sprechen",
+  "n1":"Reduktion manueller Arbeit — im Durchschnitt über alle Kunden","n2":"Tage vom ersten Call bis KI-System live in der Produktion",
+  "n3":"Kapazitätssteigerung ohne eine einzige Neueinstellung","n4":"KI-Systeme laufen, während du dich auf Strategie und Wachstum konzentrierst",
+  "case.eyebrow":"Fallstudien","case.h1":"Echte Ergebnisse","case.h2":"für echte Unternehmen","case.p":"Eine Auswahl an Transformationen, die wir für unsere Kunden entwickelt haben.",
+  "c1.tag":"E-Commerce · Deutschland","c1.t":"Vollständige Kundenservice-Automatisierung für einen Online-Händler mit 50.000+ monatlichen Bestellungen","c1.s":"KI-Chatbot + CRM-Automatisierung + E-Mail-Sequenzen","c1.l1":"Tickets durch KI bearbeitet","c1.l2":"Implementierungszeit","c1.l3":"Monatliche Einsparungen",
+  "c2.tag":"Immobilien · Österreich","c2.t":"KI-gestützte Lead-Qualifizierung und Terminbuchung für ein Immobilienverwaltungsunternehmen","c2.s":"Voice AI + Kalender-KI + CRM-Integration","c2.l1":"Mehr qualifizierte Leads","c2.l2":"Buchungsautomatisierungsrate","c2.l3":"Zeit bis Deployment",
+  "ind.eyebrow":"Branchen","ind.h1":"KI für jede","ind.h2":"Branche","ind.p":"Wenn du repetitive Prozesse hast, haben wir eine Lösung. Monovri AI arbeitet branchenübergreifend.",
+  "i1":"E-Commerce","i1d":"Bestellungen, Retouren, Support, Upsells","i2":"Gesundheitswesen","i2d":"Terminbuchung, Erinnerungen, Patientenkommunikation",
+  "i3":"Immobilien","i3d":"Lead-Bewertung, Besichtigungen, Follow-up","i4":"Kanzleien","i4d":"Mandantenaufnahme, Dokumente, Terminplanung",
+  "i5":"SaaS","i5d":"Onboarding, Churn-Reduktion, Support-KI","i6":"Bildung","i6d":"Studenten-Bots, Einschreibung, Tutoring",
+  "i7":"Gastgewerbe","i7d":"Buchungs-KI, Gasterlebnis, Bewertungsmanagement","i8":"Beratung","i8d":"Lead-Gen, Angebote, CRM-Flows",
+  "int.eyebrow":"Integrationen","int.h1":"Verbindet sich mit","int.h2":"deinem bestehenden Stack","int.p":"Kein Rip-and-Replace. Monovri AI integriert sich direkt in die Tools, die dein Team bereits verwendet.",
+  "testi.eyebrow":"Kundenstimmen","testi.h1":"Kunden.","testi.h2":"Nicht nur Auftraggeber.",
+  "t1":"\"Monovri AI hat unseren gesamten Onboarding-Prozess automatisiert. Wir sparen 20 Stunden pro Woche — und die Qualität hat sich deutlich verbessert.\"","t1n":"Laura M.","t1r":"Gründerin, SaaS-Startup · Berlin",
+  "t2":"\"Unser KI-Chatbot generiert täglich qualifizierte Leads. In 2 Wochen haben sie geliefert, was ich jahrelang gesucht hatte.\"","t2n":"Markus T.","t2r":"CEO, E-Commerce Agentur · München",
+  "t3":"\"CRM, Shopify, E-Mail — alles läuft jetzt automatisch. Der ROI war bereits in der ersten Woche sichtbar.\"","t3n":"Sophia K.","t3r":"Unternehmerin · Köln",
+  "faq.eyebrow":"FAQ","faq.h":"Jede Frage. Beantwortet.",
+  "q1":"Wie lange dauert die Implementierung?","a1":"Die meisten Systeme gehen innerhalb von 10–14 Werktagen ab dem ersten Call live. Komplexe Enterprise-Lösungen können bis zu 4 Wochen benötigen. Im Discovery Call erhalten Sie immer einen konkreten, realistischen Zeitplan.",
+  "q2":"Brauche ich technisches Know-how?","a2":"Überhaupt nicht. Wir übernehmen den gesamten Stack — von Strategie und Architektur bis hin zu Build, Integration und Deployment. Deine einzige Aufgabe ist es, deine Ziele und aktuellen Pain Points zu teilen.",
+  "q3":"Welche KI-Modelle und Plattformen nutzt ihr?","a3":"Wir arbeiten mit OpenAI, Anthropic (Claude), Google Gemini und Open-Source-Modellen, je nach Use Case. Für Automatisierungsinfrastruktur nutzen wir n8n, Make.com und maßgeschneiderte Lösungen. Wir wählen immer den optimalen Stack für deine spezifischen Anforderungen.",
+  "q4":"Wie werden meine Daten geschützt?","a4":"Datensicherheit ist für uns nicht verhandelbar. Alle Systeme werden vollständig DSGVO-konform gebaut, mit Ende-zu-Ende-Verschlüsselung und strikten Zugriffskontrollen. NDAs werden standardmäßig unterzeichnet und deine Geschäftsdaten werden niemals zum Training externer Modelle verwendet.",
+  "q5":"Welchen Support erhalte ich nach dem Launch?","a5":"Wir bieten laufende Monitoring-, Optimierungs- und Support-Retainer an. Dein KI-System ist ein lebendes Produkt — wir verfeinern seine Performance kontinuierlich, während sich dein Business entwickelt. Die meisten Kunden sehen messbare Verbesserungen in den ersten 30 Tagen nach dem Launch.",
+  "q6":"Was kostet es?","a6":"Jedes Projekt wird individuell basierend auf Komplexität und erforderlicher Automatisierungstiefe geschätzt. Wir bieten sowohl projektbasierte als auch Retainer-Modelle an. Buch einen kostenlosen Strategy Call und wir liefern innerhalb von 24 Stunden ein detailliertes Angebot — ohne Verpflichtungen.",
+  "cta.l1":"Bereit für","cta.l2":"Automatisierung?","cta.p":"Buch einen kostenlosen 30-minütigen Strategy Call. Kein Pitch. Kein Druck. Nur ein klarer Plan für dein Business.","cta.b1":"Strategy Call buchen →","cta.b2":"Nachricht senden","cta.note":"oder schreib uns direkt an",
+  "ft.about":"Europas KI-Automatisierungspartner. Wir bauen intelligente Systeme, die Unternehmen skalieren, ohne den Personalstand zu erhöhen.",
+  "ft.h1":"Leistungen","ft.h2":"Unternehmen","ft.h3":"Kontakt","ft.ind":"Branchen","ft.imprint":"Impressum","ft.privacy":"Datenschutz","ft.gdpr":"DSGVO","ft.rights":"Alle Rechte vorbehalten.","ft.made":"Mit Intelligenz gebaut. Für Ergebnisse konzipiert."
+}
+};
+
+// Stub other langs from EN
+['fr','es','it','pt','nl','pl','tr','ar','zh','ja','ko'].forEach(l => { LANGS[l] = {...LANGS.en}; });
+const FLAGS = {en:'🇺🇸',de:'🇩🇪',fr:'🇫🇷',es:'🇪🇸',it:'🇮🇹',pt:'🇵🇹',nl:'🇳🇱',pl:'🇵🇱',tr:'🇹🇷',ar:'🇸🇦',zh:'🇨🇳',ja:'🇯🇵',ko:'🇰🇷'};
+
+let CL = localStorage.getItem('ml') || 'en';
+
+function applyLang(l){
+  const T = LANGS[l] || LANGS.en;
+  document.documentElement.lang = l;
+  document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-t]').forEach(el => { const v = T[el.dataset.t]; if(v) el.textContent = v; });
+  document.getElementById('ltgl').textContent = FLAGS[l] + ' ' + l.toUpperCase();
+  document.querySelectorAll('.l-opt').forEach(b => b.classList.toggle('on', b.getAttribute('onclick').includes("'"+l+"'")));
+}
+function setL(l){ CL = l; localStorage.setItem('ml', l); applyLang(l); closeLang(); }
+function toggleLang(){ document.getElementById('langDrop').classList.toggle('open'); }
+function closeLang(){ document.getElementById('langDrop').classList.remove('open'); }
+document.getElementById('ltgl').addEventListener('click', e => { e.stopPropagation(); toggleLang(); });
+document.addEventListener('click', e => { if(!e.target.closest('#langDrop') && !e.target.closest('#ltgl')) closeLang(); });
+
+// ═══ MOBILE MENU ═══
+let menuOpen = false;
+function closeMenu(){ menuOpen = false; document.getElementById('mobMenu').classList.remove('open'); document.body.style.overflow = ''; const bs = document.querySelectorAll('.hbg b'); bs[0].style.transform=''; bs[1].style.opacity=''; bs[2].style.transform=''; }
+document.getElementById('hbg').addEventListener('click', () => {
+  menuOpen = !menuOpen;
+  document.getElementById('mobMenu').classList.toggle('open', menuOpen);
+  document.body.style.overflow = menuOpen ? 'hidden' : '';
+  const bs = document.querySelectorAll('.hbg b');
+  if(menuOpen){ bs[0].style.transform='rotate(45deg) translate(4px,4px)'; bs[1].style.opacity='0'; bs[2].style.transform='rotate(-45deg) translate(4px,-4px)'; }
+  else closeMenu();
+});
+
+// ═══ NAV SCROLL ═══
+window.addEventListener('scroll', () => { document.getElementById('nav').classList.toggle('scrolled', scrollY > 20); }, { passive: true });
+
+// ═══ REVEAL ═══
+const obs = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); }); }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+document.querySelectorAll('.r').forEach(el => obs.observe(el));
+
+// ═══ FAQ ═══
+function doFaq(btn){ const item = btn.parentElement; const was = item.classList.contains('on'); document.querySelectorAll('.faq-item.on').forEach(i=>{ i.classList.remove('on'); i.querySelector('.faq-btn').setAttribute('aria-expanded','false'); }); if(!was){ item.classList.add('on'); btn.setAttribute('aria-expanded','true'); } }
+
+// ═══ INIT ═══
+applyLang(CL);
+
+// ═══ PERF: Smooth anchor ═══
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => { const t = document.querySelector(a.getAttribute('href')); if(t){ e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+});
+</script>
+</body>
+</html>
