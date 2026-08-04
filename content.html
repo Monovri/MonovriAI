@@ -34,6 +34,9 @@ h2{font-size:15px;font-weight:700;letter-spacing:-0.01em;margin:36px 0 14px;disp
 .error{color:#ff8080}
 .loading{color:var(--muted);font-size:13.5px}
 .note{margin-top:48px;font-size:12px;color:#555;border-top:1px solid var(--line);padding-top:16px}
+.lang-toggle{display:flex;gap:6px;margin-bottom:28px}
+.lang-btn{background:none;border:1px solid var(--line);color:var(--muted);font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:8px;transition:border-color .2s,color .2s,background .2s}
+.lang-btn.on{border-color:rgba(245,168,0,0.4);color:var(--gold);background:var(--gold-subtle)}
 </style>
 </head>
 <body>
@@ -43,6 +46,10 @@ h2{font-size:15px;font-weight:700;letter-spacing:-0.01em;margin:36px 0 14px;disp
     <button class="regen" id="regenBtn">🔄 Neu generieren</button>
   </header>
   <div class="date" id="dateLine">Lädt…</div>
+  <div class="lang-toggle" id="langToggle">
+    <button class="lang-btn" data-lang="de">🇩🇪 Deutsch</button>
+    <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+  </div>
 
   <div id="content"><p class="loading">Content wird geladen…</p></div>
 
@@ -56,6 +63,9 @@ var WORKER_URL = "https://monovri-lead-agent.monovri-agency.workers.dev";
 var contentEl = document.getElementById('content');
 var dateEl = document.getElementById('dateLine');
 var regenBtn = document.getElementById('regenBtn');
+var langToggle = document.getElementById('langToggle');
+var currentLang = 'de';
+var lastData = null;
 
 function esc(s) {
   var d = document.createElement('div');
@@ -98,10 +108,12 @@ function liCard(post) {
 }
 
 function render(data) {
+  lastData = data;
   dateEl.textContent = data.date ? ('Content für ' + data.date) : '';
-  contentEl.innerHTML = '';
 
   if (data.raw) {
+    langToggle.style.display = 'none';
+    contentEl.innerHTML = '';
     var warn = document.createElement('p');
     warn.className = 'error';
     warn.textContent = 'Konnte die KI-Antwort nicht als strukturierten Content parsen — hier die Rohausgabe:';
@@ -113,26 +125,47 @@ function render(data) {
     return;
   }
 
+  langToggle.style.display = 'flex';
+  renderLang(currentLang);
+}
+
+function renderLang(lang) {
+  currentLang = lang;
+  Array.prototype.forEach.call(langToggle.children, function (btn) {
+    btn.classList.toggle('on', btn.dataset.lang === lang);
+  });
+
+  if (!lastData || lastData.raw) return;
+  contentEl.innerHTML = '';
+
+  var igList = (lastData.instagram && lastData.instagram[lang]) || [];
+  var liList = (lastData.linkedin && lastData.linkedin[lang]) || [];
+
   var igHeading = document.createElement('h2');
   igHeading.innerHTML = '📸 Instagram';
   contentEl.appendChild(igHeading);
-  if (!data.instagram || !data.instagram.length) {
+  if (!igList.length) {
     var e1 = document.createElement('p'); e1.className = 'empty'; e1.textContent = 'Keine Instagram-Posts vorhanden.';
     contentEl.appendChild(e1);
   } else {
-    data.instagram.forEach(function (p) { contentEl.appendChild(igCard(p)); });
+    igList.forEach(function (p) { contentEl.appendChild(igCard(p)); });
   }
 
   var liHeading = document.createElement('h2');
   liHeading.innerHTML = '💼 LinkedIn';
   contentEl.appendChild(liHeading);
-  if (!data.linkedin || !data.linkedin.length) {
+  if (!liList.length) {
     var e2 = document.createElement('p'); e2.className = 'empty'; e2.textContent = 'Keine LinkedIn-Posts vorhanden.';
     contentEl.appendChild(e2);
   } else {
-    data.linkedin.forEach(function (p) { contentEl.appendChild(liCard(p)); });
+    liList.forEach(function (p) { contentEl.appendChild(liCard(p)); });
   }
 }
+
+langToggle.addEventListener('click', function (e) {
+  var btn = e.target.closest('.lang-btn');
+  if (btn) renderLang(btn.dataset.lang);
+});
 
 function renderError(msg) {
   dateEl.textContent = '';
