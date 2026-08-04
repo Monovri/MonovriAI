@@ -2,6 +2,9 @@ name = "monovri-lead-agent"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
+[ai]
+binding = "AI"
+
 # Restrict the widget to your real site origin once it's live, e.g.:
 # [vars]
 # ALLOWED_ORIGIN = "https://monovri.github.io"

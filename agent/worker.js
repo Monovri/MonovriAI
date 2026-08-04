@@ -1,15 +1,15 @@
 /**
  * Monovri AI — Lead Qualification Agent
- * Cloudflare Worker that proxies chat requests to the Claude API.
+ * Cloudflare Worker that runs the chat on Cloudflare Workers AI.
  *
- * The Anthropic API key never reaches the browser: the widget in index.html
- * calls this Worker, and the Worker calls Anthropic using a secret bound
- * to the Worker environment (set with `wrangler secret put ANTHROPIC_API_KEY`).
+ * No external API key needed: Workers AI runs open-source models directly
+ * on Cloudflare's infrastructure, bound to this Worker via the `AI`
+ * binding in wrangler.toml. Free daily quota on the Cloudflare Free plan.
  *
  * Deployment steps are in agent/README.md.
  */
 
-const MODEL = "claude-haiku-4-5-20251001";
+const MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
 const MAX_OUTPUT_TOKENS = 400;
 const MAX_HISTORY_MESSAGES = 20;
 
@@ -51,9 +51,9 @@ export default {
       return new Response("Method not allowed", { status: 405, headers: cors });
     }
 
-    if (!env.ANTHROPIC_API_KEY) {
+    if (!env.AI) {
       return new Response(
-        JSON.stringify({ error: "Server misconfigured: missing ANTHROPIC_API_KEY secret." }),
+        JSON.stringify({ error: "Server misconfigured: missing AI binding in wrangler.toml." }),
         { status: 500, headers: { ...cors, "Content-Type": "application/json" } }
       );
     }
@@ -88,31 +88,20 @@ export default {
       });
     }
 
-    const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": env.ANTHROPIC_API_KEY,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: MODEL,
+    let aiResult;
+    try {
+      aiResult = await env.AI.run(MODEL, {
+        messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
         max_tokens: MAX_OUTPUT_TOKENS,
-        system: SYSTEM_PROMPT,
-        messages,
-      }),
-    });
-
-    if (!anthropicRes.ok) {
-      const errText = await anthropicRes.text();
+      });
+    } catch (e) {
       return new Response(
-        JSON.stringify({ error: "Upstream error", detail: errText }),
-        { status: anthropicRes.status, headers: { ...cors, "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Upstream error", detail: String(e) }),
+        { status: 502, headers: { ...cors, "Content-Type": "application/json" } }
       );
     }
 
-    const data = await anthropicRes.json();
-    const reply = data.content?.[0]?.text || "";
+    const reply = aiResult?.response || "";
 
     return new Response(JSON.stringify({ reply }), {
       headers: { ...cors, "Content-Type": "application/json" },
