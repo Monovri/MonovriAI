@@ -109,9 +109,13 @@ async function handleChat(request, env, cors) {
 }
 
 function parseContentJson(raw) {
-  const cleaned = raw.trim().replace(/^```(json)?/i, "").replace(/```$/, "").trim();
-  const parsed = JSON.parse(cleaned);
-  if (!Array.isArray(parsed.instagram) || !Array.isArray(parsed.linkedin)) {
+  // Workers AI models sometimes return already-parsed JSON as an object
+  // (not a string) when the output looks like JSON — handle both shapes.
+  const parsed =
+    typeof raw === "string"
+      ? JSON.parse(raw.trim().replace(/^```(json)?/i, "").replace(/```$/, "").trim())
+      : raw;
+  if (!parsed || !Array.isArray(parsed.instagram) || !Array.isArray(parsed.linkedin)) {
     throw new Error("Missing instagram/linkedin arrays");
   }
   return parsed;
@@ -123,14 +127,16 @@ async function generateMarketingContent(env) {
     max_tokens: 900,
   });
 
-  const raw = aiResult?.response || "";
+  const raw = aiResult?.response;
   const today = new Date().toISOString().slice(0, 10);
 
   let batch;
   try {
-    batch = { date: today, ...parseContentJson(raw) };
+    const parsed = parseContentJson(raw);
+    batch = { date: today, instagram: parsed.instagram, linkedin: parsed.linkedin };
   } catch {
-    batch = { date: today, instagram: [], linkedin: [], raw };
+    const rawText = typeof raw === "string" ? raw : JSON.stringify(raw ?? "");
+    batch = { date: today, instagram: [], linkedin: [], raw: rawText };
   }
 
   if (env.CONTENT_KV) {
