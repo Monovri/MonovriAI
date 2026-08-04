@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Monovri AI — Content Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#050505;--surface:rgba(255,255,255,0.03);--line:rgba(255,255,255,0.1);
+  --gold:#F5A800;--gold-subtle:rgba(245,168,0,0.08);--white:#fff;--muted:#8a8a8a;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--white);min-height:100vh;padding:32px 20px 80px;line-height:1.5}
+.wrap{max-width:820px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:8px}
+h1{font-size:22px;font-weight:800;letter-spacing:-0.02em}
+.date{color:var(--muted);font-size:13px;margin-bottom:36px}
+.badge{display:inline-block;background:var(--gold-subtle);color:var(--gold);font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;margin-bottom:4px}
+button{font-family:inherit;cursor:pointer}
+.regen{background:var(--gold);color:#000;border:none;font-weight:700;font-size:13px;padding:10px 18px;border-radius:8px;transition:transform .15s}
+.regen:hover{transform:translateY(-1px)}
+.regen:disabled{opacity:.5;cursor:default;transform:none}
+h2{font-size:15px;font-weight:700;letter-spacing:-0.01em;margin:36px 0 14px;display:flex;align-items:center;gap:8px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:14px}
+.hook{color:var(--gold);font-weight:700;font-size:14px;margin-bottom:8px}
+.body-text{font-size:14px;color:#e6e6e6;white-space:pre-wrap;margin-bottom:10px}
+.hashtags{font-size:12.5px;color:var(--muted)}
+.copy{background:none;border:1px solid var(--line);color:var(--muted);font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:7px;margin-top:12px;transition:border-color .2s,color .2s}
+.copy:hover{border-color:rgba(245,168,0,0.4);color:var(--gold)}
+.copy.copied{color:#3ddc84;border-color:rgba(61,220,132,0.4)}
+.empty,.error{color:var(--muted);font-size:13.5px;padding:20px 0}
+.error{color:#ff8080}
+.loading{color:var(--muted);font-size:13.5px}
+.note{margin-top:48px;font-size:12px;color:#555;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📣 Content Dashboard</h1>
+    <button class="regen" id="regenBtn">🔄 Neu generieren</button>
+  </header>
+  <div class="date" id="dateLine">Lädt…</div>
+
+  <div id="content"><p class="loading">Content wird geladen…</p></div>
+
+  <p class="note">Nur du kennst diese URL — die Seite ist nicht verlinkt und nicht im Sitemap/robots eingetragen. Es gibt keinen Login-Schutz, also nicht öffentlich teilen.</p>
+</div>
+
+<script>
+// Same Worker as the sales chat agent — set once, shared config.
+var WORKER_URL = "https://monovri-lead-agent.monovri-agency.workers.dev";
+
+var contentEl = document.getElementById('content');
+var dateEl = document.getElementById('dateLine');
+var regenBtn = document.getElementById('regenBtn');
+
+function esc(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function copyToClipboard(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    var original = btn.textContent;
+    btn.textContent = '✓ Kopiert';
+    btn.classList.add('copied');
+    setTimeout(function () { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
+  });
+}
+
+function igCard(post) {
+  var card = document.createElement('div');
+  card.className = 'card';
+  var full = post.hook + '\n\n' + post.caption + '\n\n' + (post.hashtags || '');
+  card.innerHTML =
+    '<div class="hook">' + esc(post.hook || '') + '</div>' +
+    '<div class="body-text">' + esc(post.caption || '') + '</div>' +
+    '<div class="hashtags">' + esc(post.hashtags || '') + '</div>' +
+    '<button class="copy">📋 Kopieren</button>';
+  card.querySelector('.copy').addEventListener('click', function (e) { copyToClipboard(full, e.target); });
+  return card;
+}
+
+function liCard(post) {
+  var card = document.createElement('div');
+  card.className = 'card';
+  var full = post.hook + '\n\n' + post.body;
+  card.innerHTML =
+    '<div class="hook">' + esc(post.hook || '') + '</div>' +
+    '<div class="body-text">' + esc(post.body || '') + '</div>' +
+    '<button class="copy">📋 Kopieren</button>';
+  card.querySelector('.copy').addEventListener('click', function (e) { copyToClipboard(full, e.target); });
+  return card;
+}
+
+function render(data) {
+  dateEl.textContent = data.date ? ('Content für ' + data.date) : '';
+  contentEl.innerHTML = '';
+
+  if (data.raw) {
+    var warn = document.createElement('p');
+    warn.className = 'error';
+    warn.textContent = 'Konnte die KI-Antwort nicht als strukturierten Content parsen — hier die Rohausgabe:';
+    contentEl.appendChild(warn);
+    var pre = document.createElement('div');
+    pre.className = 'card body-text';
+    pre.textContent = data.raw;
+    contentEl.appendChild(pre);
+    return;
+  }
+
+  var igHeading = document.createElement('h2');
+  igHeading.innerHTML = '📸 Instagram';
+  contentEl.appendChild(igHeading);
+  if (!data.instagram || !data.instagram.length) {
+    var e1 = document.createElement('p'); e1.className = 'empty'; e1.textContent = 'Keine Instagram-Posts vorhanden.';
+    contentEl.appendChild(e1);
+  } else {
+    data.instagram.forEach(function (p) { contentEl.appendChild(igCard(p)); });
+  }
+
+  var liHeading = document.createElement('h2');
+  liHeading.innerHTML = '💼 LinkedIn';
+  contentEl.appendChild(liHeading);
+  if (!data.linkedin || !data.linkedin.length) {
+    var e2 = document.createElement('p'); e2.className = 'empty'; e2.textContent = 'Keine LinkedIn-Posts vorhanden.';
+    contentEl.appendChild(e2);
+  } else {
+    data.linkedin.forEach(function (p) { contentEl.appendChild(liCard(p)); });
+  }
+}
+
+function renderError(msg) {
+  dateEl.textContent = '';
+  contentEl.innerHTML = '<p class="error">' + esc(msg) + '</p>';
+}
+
+function load(path) {
+  contentEl.innerHTML = '<p class="loading">Content wird geladen…</p>';
+  fetch(WORKER_URL + path)
+    .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+    .then(function (r) {
+      if (!r.ok) { renderError(r.data.error || 'Fehler beim Laden.'); return; }
+      render(r.data);
+    })
+    .catch(function () { renderError('Konnte den Agenten nicht erreichen. Läuft der Worker?'); });
+}
+
+regenBtn.addEventListener('click', function () {
+  regenBtn.disabled = true;
+  regenBtn.textContent = '⏳ Generiere…';
+  fetch(WORKER_URL + '/content/generate')
+    .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+    .then(function (r) {
+      if (!r.ok) { renderError(r.data.error || 'Fehler beim Generieren.'); return; }
+      render(r.data);
+    })
+    .catch(function () { renderError('Konnte den Agenten nicht erreichen.'); })
+    .finally(function () {
+      regenBtn.disabled = false;
+      regenBtn.textContent = '🔄 Neu generieren';
+    });
+});
+
+load('/content');
+</script>
+</body>
+</html>
