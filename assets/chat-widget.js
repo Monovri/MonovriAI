@@ -1,18 +1,16 @@
 /**
  * Monovri AI — Lead Qualification Chat Widget
  *
- * Talks to the Cloudflare Worker in agent/worker.js, which proxies to
- * the Claude API. Set MV_CHAT_WORKER_URL below after deploying the worker
- * (see agent/README.md) — until then the widget shows a setup notice
- * instead of silently failing.
+ * Talks to the Cloudflare Worker in agent/worker.js, which runs the chat
+ * on Cloudflare Workers AI. Set MV_CHAT_WORKER_URL below after deploying
+ * the worker (see agent/README.md) — until then the widget shows a setup
+ * notice instead of silently failing.
  */
 (function () {
   "use strict";
 
   // ── CONFIG ─────────────────────────────────────────────────────────
-  // After running `wrangler deploy` in /agent, paste your Worker URL here,
-  // e.g. "https://monovri-lead-agent.YOUR-SUBDOMAIN.workers.dev"
-  var MV_CHAT_WORKER_URL = "";
+  var MV_CHAT_WORKER_URL = "https://monovri-lead-agent.monovri-agency.workers.dev";
   // ───────────────────────────────────────────────────────────────────
 
   var I18N = {
