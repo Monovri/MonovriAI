@@ -241,23 +241,7 @@ async function handleStripeWebhook(request, env) {
 
   const valid = await verifyStripeSignature(payload, sig, env.STRIPE_WEBHOOK_SECRET);
   if (!valid) {
-    // TEMPORARY DEBUG INFO — remove once signature verification is confirmed working.
-    // Does not expose the secret itself, only harmless metadata about it.
-    const secret = env.STRIPE_WEBHOOK_SECRET;
-    return new Response(
-      JSON.stringify({
-        error: "Invalid signature",
-        debug: {
-          secretLength: secret.length,
-          secretPrefix: secret.slice(0, 10),
-          secretSuffix: secret.slice(-6),
-          secretHasWhitespace: /\s/.test(secret),
-          sigHeaderPresent: !!sig,
-          sigHeaderPreview: sig ? sig.slice(0, 40) : null,
-        },
-      }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response("Invalid signature", { status: 400 });
   }
 
   let event;
