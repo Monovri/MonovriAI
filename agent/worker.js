@@ -576,6 +576,75 @@ async function sendResendEmail(env, { to, subject, html }) {
   return res.json();
 }
 
+async function handleVoiceBooking(request, env) {
+  if (!env.RESEND_API_KEY) {
+    return new Response(
+      JSON.stringify({ error: "Server misconfigured: missing RESEND_API_KEY." }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+  if (!env.FOUNDER_EMAIL) {
+    return new Response(
+      JSON.stringify({ error: "Server misconfigured: missing FOUNDER_EMAIL." }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON body." }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Vapi wraps custom tool-call arguments inside body.message.toolCalls[0].function.arguments.
+  const args =
+    body?.message?.toolCalls?.[0]?.function?.arguments ?? body?.arguments ?? body ?? {};
+
+  const name = args.name || "unbekannt";
+  const company = args.company || "unbekannt";
+  const contact = args.contact || "unbekannt";
+  const preferredTime = args.preferredTime || "unbekannt";
+  const notes = args.notes || "-";
+
+  const html = `<p>Neue Terminanfrage über den Voice-Agent:</p>
+<ul>
+  <li><strong>Name:</strong> ${name}</li>
+  <li><strong>Firma:</strong> ${company}</li>
+  <li><strong>Kontakt (Telefon/E-Mail):</strong> ${contact}</li>
+  <li><strong>Wunschtermin:</strong> ${preferredTime}</li>
+  <li><strong>Notizen:</strong> ${notes}</li>
+</ul>
+<p>Bitte manuell in den Google Kalender eintragen.</p>`;
+
+  try {
+    await sendResendEmail(env, {
+      to: env.FOUNDER_EMAIL,
+      subject: `Neue Terminanfrage: ${name} (${company})`,
+      html,
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Mail send failed", detail: String(e) }), {
+      status: 502,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Vapi expects a "results" array keyed by toolCallId for custom tool responses.
+  const toolCallId = body?.message?.toolCalls?.[0]?.id;
+  const resultPayload = toolCallId
+    ? { results: [{ toolCallId, result: "Terminanfrage per E-Mail an den Firmengründer gesendet." }] }
+    : { ok: true };
+
+  return new Response(JSON.stringify(resultPayload), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
 async function handleStripeWebhook(request, env) {
   const payload = await request.text();
   const sig = request.headers.get("Stripe-Signature");
@@ -700,6 +769,10 @@ export default {
 
     if (url.pathname === "/finance/overview" && request.method === "GET") {
       return handleFinanceOverview(env, cors);
+    }
+
+    if (url.pathname === "/voice/booking" && request.method === "POST") {
+      return handleVoiceBooking(request, env);
     }
 
     if (url.pathname === "/content/generate" && request.method === "GET") {
