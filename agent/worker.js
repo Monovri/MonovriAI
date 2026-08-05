@@ -236,15 +236,31 @@ async function handleCustomerChat(request, env, cors, customerId) {
   if (!customer || !customer.active) {
     return jsonResponse({ error: "Unknown or inactive customer." }, 404, cors);
   }
+
+  // First real browser request locks this agent to that origin, so the
+  // embed snippet can't just be copy-pasted onto unrelated websites.
+  const origin = request.headers.get("Origin") || "";
+  if (!customer.allowedOrigin && origin) {
+    customer.allowedOrigin = origin;
+    if (env.CONTENT_KV) await saveCustomer(env, customerId, customer);
+  } else if (customer.allowedOrigin && origin && origin !== customer.allowedOrigin) {
+    return jsonResponse(
+      { error: "This agent is registered to a different website." },
+      403,
+      corsHeaders(origin, customer.allowedOrigin)
+    );
+  }
+  const customerCors = corsHeaders(origin, customer.allowedOrigin || "*");
+
   if (!env.AI) {
-    return jsonResponse({ error: "Server misconfigured: missing AI binding." }, 500, cors);
+    return jsonResponse({ error: "Server misconfigured: missing AI binding." }, 500, customerCors);
   }
 
   let body;
   try {
     body = await request.json();
   } catch {
-    return jsonResponse({ error: "Invalid JSON body." }, 400, cors);
+    return jsonResponse({ error: "Invalid JSON body." }, 400, customerCors);
   }
 
   const incoming = Array.isArray(body.messages) ? body.messages : [];
@@ -261,7 +277,7 @@ async function handleCustomerChat(request, env, cors, customerId) {
     .map((m) => ({ role: m.role, content: m.content.trim() }));
 
   if (messages.length === 0 || messages[messages.length - 1].role !== "user") {
-    return jsonResponse({ error: "No user message provided." }, 400, cors);
+    return jsonResponse({ error: "No user message provided." }, 400, customerCors);
   }
 
   let aiResult;
@@ -274,10 +290,10 @@ async function handleCustomerChat(request, env, cors, customerId) {
       max_tokens: 400,
     });
   } catch (e) {
-    return jsonResponse({ error: "Upstream error", detail: String(e) }, 502, cors);
+    return jsonResponse({ error: "Upstream error", detail: String(e) }, 502, customerCors);
   }
 
-  return jsonResponse({ reply: aiResult?.response || "" }, 200, cors);
+  return jsonResponse({ reply: aiResult?.response || "" }, 200, customerCors);
 }
 
 function customerWidgetScript(customerId, companyName, workerUrl) {
