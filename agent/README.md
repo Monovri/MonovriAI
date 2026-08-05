@@ -16,9 +16,30 @@ Dieser Ordner enthält den Backend-Code für alle internen Agenten, die auf
    Sprache, auf einer privaten Seite (`creator.html`).
 5. **Research-Agent** — Recherche-Chat für Markt-/Wettbewerbsanalysen und
    Prospect-Recherche, auf einer privaten Seite (`research.html`).
-6. **Kunden-Chat-Agenten** — die Agenten, die du an zahlende Kunden
+6. **Kundenservice Co-Pilot** — Kundennachricht einfügen, fertigen
+   Antwortentwurf zum Kopieren bekommen, auf einer privaten Seite
+   (`kundenservice.html`). Noch kein Live-Kanal (z.B. WhatsApp Business
+   API) angebunden — rein manuelles Copy-Paste-Workflow für jetzt.
+7. **Operations-Agent** — Workflow-/Automatisierungs-Blueprints,
+   Priorisierung, Prozess-Doku, auf einer privaten Seite
+   (`operations.html`). Liefert Pläne/Anleitungen, keine live laufende
+   Automatisierung — dafür bräuchtest du später einen n8n/Make-Account.
+8. **Finance-Agent** — Dashboard mit echten Kunden-/Umsatzzahlen aus der
+   `CONTENT_KV`-Kundendatenbank (Stripe-Kunden) plus Finanz-Chat, auf
+   einer privaten Seite (`finance.html`). Gibt keine verbindliche
+   Steuerberatung — verweist bei Steuerfragen bewusst auf den
+   Steuerberater.
+9. **Kunden-Chat-Agenten** — die Agenten, die du an zahlende Kunden
    verkaufst (automatisch eingerichtet über die Stripe-Zahlungspipeline,
    siehe unten im Code `handleStripeWebhook`).
+
+Zusätzlich gibt es `verkauf.html` — eine private Preise-&-Pakete-Seite mit
+Einzelartikeln und 3 Bundle-Paketen (Monatlich/Einmalig umschaltbar). Sie
+ist bewusst **noch nicht live/verlinkt** — die "Jetzt buchen"-Buttons
+zeigen "Bald verfügbar" an, bis du echte Stripe-Zahlungslinks einträgst
+(siehe `LINKS`-Objekt oben im `<script>` der Datei). Erst verlinken/live
+schalten, wenn Gewerbe-Ummeldung und Steuerberater-Bestätigung erledigt
+sind.
 
 Warum ein separates Backend nötig ist: GitHub Pages liefert nur statische
 Dateien aus. Die Agenten müssen ein KI-Modell ansprechen und (bei den
@@ -88,8 +109,9 @@ automatisch neuen Content generieren, ohne dass du etwas anklicken musst:
 1. Falls noch nicht geschehen: `assets/chat-widget.js` öffnen, ganz oben
    `MV_CHAT_WORKER_URL` mit deiner Worker-URL befüllen (siehe unten für
    Widget-Details).
-2. Öffne `content.html`, `ceo.html`, `creator.html` und `research.html`
-   im Projekt-Root — in jeder Datei steht oben im `<script>` dieselbe
+2. Öffne `content.html`, `ceo.html`, `creator.html`, `research.html`,
+   `kundenservice.html`, `operations.html` und `finance.html` im
+   Projekt-Root — in jeder Datei steht oben im `<script>` dieselbe
    `WORKER_URL`. Standardmäßig schon auf
    `https://monovri-lead-agent.monovri-agency.workers.dev` gesetzt, falls
    das dein Worker-Name/Subdomain ist, musst du nichts ändern.
@@ -127,6 +149,18 @@ Social-Post-Entwürfen.
 `https://monovri.github.io/MonovriAI/research.html`), Recherche-Frage
 eintippen.
 
+**Kundenservice Co-Pilot:** `kundenservice.html` öffnen (live unter
+`https://monovri.github.io/MonovriAI/kundenservice.html`), eine
+Kundennachricht einfügen, Antwortentwurf kopieren.
+
+**Operations-Agent:** `operations.html` öffnen (live unter
+`https://monovri.github.io/MonovriAI/operations.html`), Frage zu
+Workflows/Priorisierung stellen.
+
+**Finance-Agent:** `finance.html` öffnen (live unter
+`https://monovri.github.io/MonovriAI/finance.html`) — zeigt oben echte
+Kunden-/MRR-Zahlen aus deiner Kundendatenbank, darunter ein Finanz-Chat.
+
 Fehlermeldungen:
 - *"missing AI binding"* → Schritt 2 fehlt.
 - *"missing CONTENT_KV binding"* → Schritt 3 fehlt.
@@ -146,6 +180,15 @@ Fehlermeldungen:
   Plattformen.
 - **Fokus (Research-Agent) ändern:** `RESEARCH_SYSTEM_PROMPT` in
   `worker.js`.
+- **Ton (Kundenservice Co-Pilot) ändern:** `KUNDENSERVICE_SYSTEM_PROMPT`
+  in `worker.js`.
+- **Fokus (Operations-Agent) ändern:** `OPERATIONS_SYSTEM_PROMPT` in
+  `worker.js`.
+- **Fokus (Finance-Agent) ändern:** `FINANCE_SYSTEM_PROMPT` in
+  `worker.js`. Der angenommene Preis pro Kunde für die MRR-Schätzung
+  steht in der Konstante `PRICE_PER_CUSTOMER_EUR`.
+- **Preise auf der Verkaufsseite ändern:** `data-monthly`/`data-once`
+  Attribute in `verkauf.html` — direkt in den Preis-Karten sichtbar.
 - **Cron-Zeitpunkt ändern:** Im Dashboard unter Triggers, oder in
   `wrangler.toml` bei CLI-Deployment.
 - **Anderes (kostenloses) Modell:** Konstante `MODEL` in `worker.js` —

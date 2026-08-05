@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Monovri AI — Kundenservice Co-Pilot</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#050505;--surface:rgba(255,255,255,0.03);--line:rgba(255,255,255,0.1);
+  --gold:#F5A800;--gold-subtle:rgba(245,168,0,0.08);--white:#fff;--muted:#8a8a8a;
+}
+html,body{height:100%}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--white);line-height:1.5;display:flex;flex-direction:column}
+.wrap{max-width:760px;margin:0 auto;width:100%;flex:1;display:flex;flex-direction:column;padding:24px 20px 0}
+header{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+h1{font-size:20px;font-weight:800;letter-spacing:-0.02em}
+.sub{color:var(--muted);font-size:12.5px;margin-bottom:20px}
+.body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding-bottom:20px}
+.body::-webkit-scrollbar{width:3px}
+.body::-webkit-scrollbar-thumb{background:rgba(245,168,0,0.3);border-radius:2px}
+.msg{max-width:88%;padding:12px 16px;border-radius:14px;font-size:14px;line-height:1.6;white-space:pre-wrap}
+.msg.bot{align-self:flex-start;background:var(--surface);border:1px solid var(--line)}
+.msg.user{align-self:flex-end;background:var(--gold);color:#000;font-weight:500}
+.msg.err{align-self:flex-start;background:rgba(255,80,80,0.12);color:#ff8080;border:1px solid rgba(255,80,80,0.25)}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:12px 14px;background:var(--surface);border-radius:14px;border:1px solid var(--line)}
+.typing span{width:5px;height:5px;border-radius:50%;background:#888;animation:blink 1.2s infinite ease-in-out}
+.typing span:nth-child(2){animation-delay:0.2s}
+.typing span:nth-child(3){animation-delay:0.4s}
+@keyframes blink{0%,80%,100%{opacity:0.3}40%{opacity:1}}
+.empty{color:var(--muted);font-size:13.5px;padding:40px 0;text-align:center}
+footer{position:sticky;bottom:0;background:var(--ink);padding:14px 0 24px;border-top:1px solid var(--line);display:flex;gap:8px;max-width:760px;margin:0 auto;width:100%;padding-left:20px;padding-right:20px}
+textarea{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:#fff;font:400 14px/1.4 'Inter',sans-serif;resize:none;outline:none;max-height:140px}
+textarea:focus{border-color:rgba(245,168,0,0.4)}
+textarea::placeholder{color:#555}
+button{font-family:inherit;cursor:pointer}
+.send{background:var(--gold);border:none;border-radius:10px;width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.send:disabled{opacity:.4;cursor:default}
+.note{margin:14px 0 0;font-size:11px;color:#444;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎧 Kundenservice Co-Pilot</h1>
+  </header>
+  <div class="sub">Füg eine Kundennachricht ein — du bekommst einen fertigen Antwortentwurf zum Kopieren. Noch kein Live-Kanal (WhatsApp etc.) angebunden, also manuell versenden.</div>
+  <div class="body" id="body">
+    <div class="empty" id="empty">Kopier einfach eine Kunden-E-Mail, WhatsApp- oder Kontaktformular-Nachricht rein — du bekommst einen Antwortentwurf.</div>
+  </div>
+</div>
+<footer>
+  <textarea id="input" rows="1" placeholder="Kundennachricht hier einfügen…"></textarea>
+  <button class="send" id="send" aria-label="Senden">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7z"/><path d="M22 2 11 13"/></svg>
+  </button>
+</footer>
+<p class="note">Nur du kennst diese URL — nicht verlinkt, nicht im Sitemap/robots. Kein Login-Schutz, also nicht öffentlich teilen.</p>
+
+<script>
+var WORKER_URL = "https://monovri-lead-agent.monovri-agency.workers.dev";
+
+var bodyEl = document.getElementById('body');
+var emptyEl = document.getElementById('empty');
+var input = document.getElementById('input');
+var sendBtn = document.getElementById('send');
+var chatHistory = [];
+
+function addMsg(role, text) {
+  if (emptyEl) { emptyEl.remove(); emptyEl = null; }
+  var el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.textContent = text;
+  bodyEl.appendChild(el);
+  bodyEl.scrollTop = bodyEl.scrollHeight;
+  return el;
+}
+
+function addTyping() {
+  if (emptyEl) { emptyEl.remove(); emptyEl = null; }
+  var el = document.createElement('div');
+  el.className = 'typing';
+  el.innerHTML = '<span></span><span></span><span></span>';
+  bodyEl.appendChild(el);
+  bodyEl.scrollTop = bodyEl.scrollHeight;
+  return el;
+}
+
+async function submit() {
+  var text = input.value.trim();
+  if (!text) return;
+  addMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  input.value = '';
+  input.style.height = 'auto';
+  sendBtn.disabled = true;
+  var typingEl = addTyping();
+
+  try {
+    var res = await fetch(WORKER_URL + '/kundenservice/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: chatHistory }),
+    });
+    var data = await res.json();
+    typingEl.remove();
+    if (!res.ok || !data.reply) {
+      addMsg('err', data.error || 'Da ist etwas schiefgelaufen. Bitte nochmal versuchen.');
+    } else {
+      addMsg('bot', data.reply);
+      chatHistory.push({ role: 'assistant', content: data.reply });
+    }
+  } catch (e) {
+    typingEl.remove();
+    addMsg('err', 'Konnte den Agenten nicht erreichen. Läuft der Worker?');
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+sendBtn.addEventListener('click', submit);
+input.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    submit();
+  }
+});
+input.addEventListener('input', function () {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+});
+input.focus();
+</script>
+</body>
+</html>
