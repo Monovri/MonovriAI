@@ -36,8 +36,9 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
 .cta{font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;display:block;background:var(--gold);color:#000;font-weight:700;font-size:13.5px;padding:12px 16px;border-radius:10px;border:none;transition:transform .15s}
 .cta:hover{transform:translateY(-1px)}
 .cta.disabled{background:var(--surface);color:var(--muted);border:1px solid var(--line);cursor:default;pointer-events:none}
-.items{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px}
-@media(max-width:820px){.items{grid-template-columns:1fr}}
+.items{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px}
+@media(max-width:960px){.items{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.items{grid-template-columns:1fr}}
 .item{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
 .item-name{font-weight:700;font-size:14px;margin-bottom:4px}
 .item-price{color:var(--gold);font-weight:700;font-size:18px;margin-bottom:4px}
@@ -119,6 +120,12 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
       <div class="item-desc">Fertige Antwortentwürfe für Kundenanfragen zum Copy-Paste.</div>
       <a class="cta" data-link-key="service">Jetzt buchen</a>
     </div>
+    <div class="item">
+      <div class="item-name">📞 Voice-Agent</div>
+      <div class="item-price"><span class="amt" data-monthly="179" data-once="1290">179€</span> <span class="unit" data-unit>/ Monat</span></div>
+      <div class="item-desc">KI-Telefonagent für Terminbuchungen und Anfragen.</div>
+      <a class="cta" data-link-key="voice">Jetzt buchen</a>
+    </div>
   </div>
 
   <p class="note">Alle Preise zzgl. ggf. anfallender USt. Monatliche Abos jederzeit kündbar. Einmalig = einmalige Einrichtung ohne laufenden Support/Updates.</p>
@@ -129,12 +136,13 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
 // Solange ein Wert leer ist, zeigt der Button automatisch "Bald verfügbar" und
 // ist deaktiviert, statt auf eine kaputte Seite zu verlinken.
 var LINKS = {
-  starter: { monthly: "", once: "" },
-  growth: { monthly: "", once: "" },
-  allin: { monthly: "", once: "" },
-  chat: { monthly: "", once: "" },
-  content: { monthly: "", once: "" },
-  service: { monthly: "", once: "" },
+  starter: { monthly: "https://buy.stripe.com/14AeVf1Nybtofv64s4dwc08", once: "https://buy.stripe.com/14AeVf2RC9lg5Uw0bOdwc09" },
+  growth: { monthly: "https://buy.stripe.com/aFafZj63O694aaM3o0dwc0a", once: "https://buy.stripe.com/28E00lfEoeFA5UwbUwdwc0b" },
+  allin: { monthly: "https://buy.stripe.com/bJe3cxak40OKaaMgaMdwc0c", once: "https://buy.stripe.com/eVq14p77S9lggza4s4dwc0d" },
+  chat: { monthly: "https://buy.stripe.com/9B628t77Sapk96I8Ikdwc00", once: "https://buy.stripe.com/00w8wRgIs40W82E2jWdwc01" },
+  content: { monthly: "https://buy.stripe.com/00w9AV3VG7d8beQf6Idwc02", once: "https://buy.stripe.com/8x25kF1Ny40W3Mof6Idwc03" },
+  service: { monthly: "https://buy.stripe.com/5kQ00lak440W82Ee2Edwc04", once: "https://buy.stripe.com/fZu9AV0Juapker25w8dwc05" },
+  voice: { monthly: "https://buy.stripe.com/14AfZj4ZKdBwer20bOdwc06", once: "https://buy.stripe.com/9B64gB4ZK7d84Qs9Modwc07" },
 };
 
 var mode = 'monthly';
