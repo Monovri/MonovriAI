@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Monovri AI — Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#050505;--surface:rgba(255,255,255,0.03);--line:rgba(255,255,255,0.1);
+  --gold:#F5A800;--gold-subtle:rgba(245,168,0,0.08);--white:#fff;--muted:#8a8a8a;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--white);min-height:100vh;padding:40px 20px 80px;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto}
+h1{font-size:24px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:32px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;margin-top:20px}
+label:first-of-type{margin-top:0}
+input,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:#fff;font:400 14px/1.4 'Inter',sans-serif;resize:vertical;outline:none}
+input:focus,textarea:focus{border-color:rgba(245,168,0,0.4)}
+input::placeholder,textarea::placeholder{color:#555}
+.hint{color:var(--muted);font-size:12px;margin-top:4px}
+button{font-family:inherit;cursor:pointer}
+.submit{margin-top:28px;background:var(--gold);color:#000;border:none;font-weight:700;font-size:14px;padding:13px 20px;border-radius:10px;width:100%;transition:transform .15s}
+.submit:hover{transform:translateY(-1px)}
+.submit:disabled{opacity:.5;cursor:default;transform:none}
+.msg{margin-top:20px;padding:14px 16px;border-radius:10px;font-size:13.5px}
+.msg.ok{background:rgba(61,220,132,0.1);color:#3ddc84;border:1px solid rgba(61,220,132,0.3)}
+.msg.err{background:rgba(255,80,80,0.1);color:#ff8080;border:1px solid rgba(255,80,80,0.3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>👋 Kurzes Setup</h1>
+  <p class="sub">Damit deine Inhalte zu deinem Business passen, brauchen wir ein paar Angaben — dauert 2 Minuten.</p>
+
+  <div id="form">
+    <label for="industry">Branche</label>
+    <input id="industry" type="text" placeholder="z.B. Zahnarztpraxis, Fitnessstudio, Handwerksbetrieb">
+
+    <label for="audience">Zielgruppe</label>
+    <input id="audience" type="text" placeholder="z.B. Familien in der Region, Firmenkunden, junge Berufstätige">
+
+    <label for="tone">Gewünschter Ton</label>
+    <input id="tone" type="text" placeholder="z.B. locker & persönlich, seriös & professionell">
+
+    <label for="description">Kurzbeschreibung deines Angebots</label>
+    <textarea id="description" rows="4" placeholder="Was bietest du an, was macht dich besonders?"></textarea>
+    <div class="hint">Diese Angaben nutzen wir nur, um deine Inhalte/Antworten passend zu formulieren.</div>
+
+    <label for="notifyEmail">E-Mail für Terminbenachrichtigungen (nur falls du den Voice-Agent gebucht hast)</label>
+    <input id="notifyEmail" type="email" placeholder="team@deine-firma.de">
+
+    <button class="submit" id="submitBtn">Speichern</button>
+  </div>
+  <div id="result"></div>
+</div>
+
+<script>
+var WORKER_URL = "https://monovri-lead-agent.monovri-agency.workers.dev";
+var customerId = new URLSearchParams(window.location.search).get('customer');
+var resultEl = document.getElementById('result');
+var formEl = document.getElementById('form');
+var submitBtn = document.getElementById('submitBtn');
+
+if (!customerId) {
+  formEl.style.display = 'none';
+  resultEl.innerHTML = '<div class="msg err">Kein Kunden-Link erkannt. Bitte nutz den Link aus deiner Willkommens-E-Mail.</div>';
+}
+
+submitBtn.addEventListener('click', function () {
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Speichere…';
+
+  var payload = {
+    industry: document.getElementById('industry').value.trim(),
+    audience: document.getElementById('audience').value.trim(),
+    tone: document.getElementById('tone').value.trim(),
+    description: document.getElementById('description').value.trim(),
+    notifyEmail: document.getElementById('notifyEmail').value.trim(),
+  };
+
+  fetch(WORKER_URL + '/setup/' + customerId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+    .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+    .then(function (r) {
+      if (!r.ok) {
+        resultEl.innerHTML = '<div class="msg err">' + (r.data.error || 'Fehler beim Speichern.') + '</div>';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Speichern';
+        return;
+      }
+      formEl.style.display = 'none';
+      var extra = '';
+      if (r.data.voice && r.data.voice.phoneNumber) {
+        extra = '<br><br>📞 Deine Voice-Agent-Nummer: <strong>' + r.data.voice.phoneNumber + '</strong> — leite deine bestehende Nummer bei Nichtannahme/Besetzt dorthin weiter (Anleitung kommt per separater Mail).';
+      } else if (r.data.voiceError) {
+        extra = '<br><br>⚠️ Dein Voice-Agent konnte noch nicht automatisch eingerichtet werden. Wir melden uns manuell bei dir.';
+      }
+      resultEl.innerHTML = '<div class="msg ok">✓ Gespeichert! Deine Inhalte/Antwortentwürfe werden ab jetzt darauf abgestimmt. Du kannst die Links aus deiner Willkommens-Mail jetzt nutzen.' + extra + '</div>';
+    })
+    .catch(function () {
+      resultEl.innerHTML = '<div class="msg err">Konnte den Server nicht erreichen. Bitte später erneut versuchen.</div>';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Speichern';
+    });
+});
+</script>
+</body>
+</html>

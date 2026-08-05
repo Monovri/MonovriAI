@@ -40,6 +40,34 @@ Dieser Ordner enthält den Backend-Code für alle internen Agenten, die auf
     keine direkte Google-Calendar-Anbindung funktioniert — der Termin
     wird dann manuell in den Kalender eingetragen).
 
+### Verkaufte Produkte: automatische Einrichtung pro Kunde
+
+Vier Produkte lassen sich verkaufen, alle automatisch eingerichtet ohne
+manuellen Aufwand für dich:
+
+- **Website Chat-Agent** — sofort startklar nach Kauf (Code-Schnipsel per
+  Mail).
+- **Content-Automatisierung** & **Kundenservice Co-Pilot** — der Kunde
+  füllt nach dem Kauf einmalig ein kurzes Setup-Formular
+  (`setup.html?customer=ID`, Link kommt per Willkommensmail) mit
+  Branche/Zielgruppe/Ton/Beschreibung aus. Danach erzeugen ihre privaten
+  Seiten `content-kunde.html?customer=ID` bzw.
+  `kundenservice-kunde.html?customer=ID` automatisch passenden Content
+  bzw. Antwortentwürfe.
+- **Voice-Agent** — beim Ausfüllen desselben Setup-Formulars wird
+  automatisch (über die Vapi-API) eine eigene Telefonnummer + ein eigener
+  Voice-Assistent für den Kunden erstellt und die Nummer direkt im
+  Formular angezeigt. Braucht die Secret-Variable `VAPI_API_KEY`
+  (Schritt 5).
+
+**Wichtig, damit das funktioniert:** Beim Anlegen der Stripe Payment
+Links (siehe `verkauf.html`) muss jeder Link eine **Metadata**
+namens `products` mit einem kommagetrennten Wert bekommen, z.B.
+`chat_agent` oder `chat_agent,content_agent` oder
+`chat_agent,content_agent,kundenservice_agent`. Gültige Werte:
+`chat_agent`, `content_agent`, `kundenservice_agent`, `voice_agent`.
+Ohne diese Metadata wird automatisch nur `chat_agent` angenommen.
+
 Zusätzlich gibt es `verkauf.html` — eine private Preise-&-Pakete-Seite mit
 Einzelartikeln und 3 Bundle-Paketen (Monatlich/Einmalig umschaltbar). Sie
 ist bewusst **noch nicht live/verlinkt** — die "Jetzt buchen"-Buttons
@@ -131,6 +159,12 @@ automatisch neuen Content generieren, ohne dass du etwas anklicken musst:
    E-Mail-Adresse hinzufügen — dahin gehen die Terminanfragen, die der
    Voice-Agent per Telefon aufnimmt. `RESEND_API_KEY` muss dafür bereits
    gesetzt sein (läuft schon für die Willkommensmail).
+5. Für die automatische Voice-Agent-Einrichtung pro Kunde: eine weitere
+   Secret-Variable `VAPI_API_KEY` hinzufügen — den Wert findest du in
+   deinem Vapi-Dashboard unter **API Keys** (privater Key, nicht der
+   öffentliche). Ohne diese Variable wird beim Setup-Formular kein
+   Voice-Agent automatisch erstellt (Kunde bekommt stattdessen eine
+   Hinweismeldung, dass sich das Team manuell meldet).
 
 *(Alternative für Terminal-erfahrene: `npm install -g wrangler`, dann in
 diesem Ordner `wrangler login`, `wrangler kv namespace create CONTENT_KV`
@@ -172,6 +206,14 @@ Workflows/Priorisierung stellen.
 **Finance-Agent:** `finance.html` öffnen (live unter
 `https://monovri.github.io/MonovriAI/finance.html`) — zeigt oben echte
 Kunden-/MRR-Zahlen aus deiner Kundendatenbank, darunter ein Finanz-Chat.
+
+**Kunden-Setup-Formular:** `setup.html?customer=TESTID` öffnen (mit einer
+echten Kunden-ID aus einem Testkauf), Formular ausfüllen, prüfen ob
+"Gespeichert" erscheint (und bei Voice-Agent-Kunden eine Telefonnummer).
+
+**Kunden-Content-/Kundenservice-Seiten:** `content-kunde.html?customer=ID`
+bzw. `kundenservice-kunde.html?customer=ID` — erst nutzbar, nachdem das
+Setup-Formular für diese Kunden-ID ausgefüllt wurde.
 
 Fehlermeldungen:
 - *"missing AI binding"* → Schritt 2 fehlt.
@@ -228,3 +270,11 @@ Fehlermeldungen:
   gepostet werden (Copy-Paste über den "Kopieren"-Button). Echtes
   Auto-Posten würde eine Meta-/LinkedIn-App-Freigabe brauchen — deutlich
   mehr Aufwand, bei Bedarf später möglich.
+- Die automatische Voice-Agent-Einrichtung über die Vapi-API
+  (`provisionVoiceAgent` in `worker.js`) konnte nicht live gegen die
+  echte Vapi-API getestet werden (Sandbox-Beschränkung während der
+  Entwicklung). Beim ersten echten Testkauf mit Voice-Agent-Produkt
+  solltest du die Reaktion genau prüfen — falls `voiceError` in der
+  Setup-Antwort auftaucht, zeigt dir der Fehlertext genau, welches Feld
+  angepasst werden muss (gleiches Prinzip wie bei der Tool-Erstellung im
+  Vapi-Dashboard).
