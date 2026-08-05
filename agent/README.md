@@ -32,6 +32,13 @@ Dieser Ordner enthält den Backend-Code für alle internen Agenten, die auf
 9. **Kunden-Chat-Agenten** — die Agenten, die du an zahlende Kunden
    verkaufst (automatisch eingerichtet über die Stripe-Zahlungspipeline,
    siehe unten im Code `handleStripeWebhook`).
+10. **Voice-Agent (Telefon)** — läuft extern bei Vapi (nicht in diesem
+    Worker), nutzt aber den Endpunkt `POST /voice/booking` in `worker.js`
+    als "Tool"/Funktion: sobald der Anrufer einen Terminwunsch äußert,
+    ruft der Voice-Agent diesen Endpunkt auf, der eine E-Mail mit den
+    Termindetails an `FOUNDER_EMAIL` schickt (Übergangslösung, solange
+    keine direkte Google-Calendar-Anbindung funktioniert — der Termin
+    wird dann manuell in den Kalender eingetragen).
 
 Zusätzlich gibt es `verkauf.html` — eine private Preise-&-Pakete-Seite mit
 Einzelartikeln und 3 Bundle-Paketen (Monatlich/Einmalig umschaltbar). Sie
@@ -119,6 +126,11 @@ automatisch neuen Content generieren, ohne dass du etwas anklicken musst:
    and Secrets** eine Text-Variable `ALLOWED_ORIGIN` mit dem Wert
    `https://monovri.github.io` hinzufügen, damit nur deine Website den
    Sales-Agenten benutzen kann.
+4. Für den Voice-Agent (Telefon, bei Vapi): unter **Settings → Variables
+   and Secrets** eine Text-Variable `FOUNDER_EMAIL` mit deiner
+   E-Mail-Adresse hinzufügen — dahin gehen die Terminanfragen, die der
+   Voice-Agent per Telefon aufnimmt. `RESEND_API_KEY` muss dafür bereits
+   gesetzt sein (läuft schon für die Willkommensmail).
 
 *(Alternative für Terminal-erfahrene: `npm install -g wrangler`, dann in
 diesem Ordner `wrangler login`, `wrangler kv namespace create CONTENT_KV`
