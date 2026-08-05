@@ -1,7 +1,7 @@
 # Monovri AI — Agent Worker: Deployment
 
-Dieser Ordner enthält den Backend-Code für zwei Agenten, die auf **einem**
-Cloudflare Worker laufen:
+Dieser Ordner enthält den Backend-Code für alle internen Agenten, die auf
+**einem** Cloudflare Worker laufen:
 
 1. **Sales-/Lead-Qualifizierungs-Agent** — der goldene Chat-Button unten
    rechts auf der Website. Begrüßt Besucher, findet heraus was sie
@@ -9,13 +9,23 @@ Cloudflare Worker laufen:
 2. **Marketing-Content-Agent** — generiert jeden Tag automatisch Instagram-
    und LinkedIn-Post-Entwürfe und stellt sie auf einer privaten Seite
    (`content.html`) bereit, die nur du kennst.
+3. **CEO-Assistent** — strategischer Sparringspartner-Chat auf einer
+   privaten Seite (`ceo.html`), kennt den aktuellen Stand des Unternehmens.
+4. **Content-Creator-Agent** — generiert jeden Tag automatisch einen
+   Blog-Artikel-Outline sowie 2 Kurzvideo-Skripte (Reels/TikTok/Shorts) pro
+   Sprache, auf einer privaten Seite (`creator.html`).
+5. **Research-Agent** — Recherche-Chat für Markt-/Wettbewerbsanalysen und
+   Prospect-Recherche, auf einer privaten Seite (`research.html`).
+6. **Kunden-Chat-Agenten** — die Agenten, die du an zahlende Kunden
+   verkaufst (automatisch eingerichtet über die Stripe-Zahlungspipeline,
+   siehe unten im Code `handleStripeWebhook`).
 
 Warum ein separates Backend nötig ist: GitHub Pages liefert nur statische
-Dateien aus. Die Agenten müssen ein KI-Modell ansprechen und (beim
-Marketing-Agent) Ergebnisse speichern — das läuft über den Cloudflare
-Worker (`worker.js`) dazwischen.
+Dateien aus. Die Agenten müssen ein KI-Modell ansprechen und (bei den
+Content-generierenden Agenten) Ergebnisse speichern — das läuft über den
+Cloudflare Worker (`worker.js`) dazwischen.
 
-**Kostenlos:** Beide Agenten laufen komplett auf **Cloudflare Workers AI**
+**Kostenlos:** Alle Agenten laufen komplett auf **Cloudflare Workers AI**
 — kein Anthropic/OpenAI-Account, kein Zahlungsdaten-Hinterlegen nötig. Du
 brauchst nur einen kostenlosen Cloudflare-Account.
 
@@ -46,11 +56,13 @@ aktualisierten Code aus `worker.js` neu einfügen.)*
    (Großbuchstaben — muss exakt so heißen).
 3. Speichern.
 
-## Schritt 3 — KV-Namespace für den Marketing-Agent anlegen (neu)
+## Schritt 3 — KV-Namespace für Content-Agenten & Kundendaten anlegen
 
-Der Marketing-Agent speichert den täglich generierten Content zwischen,
-damit die Dashboard-Seite ihn sofort anzeigen kann, ohne jedes Mal neu zu
-generieren.
+Der Marketing-Agent und der Content-Creator-Agent speichern den täglich
+generierten Content zwischen (unter eigenen Keys im selben Namespace),
+damit die Dashboard-Seiten ihn sofort anzeigen können, ohne jedes Mal neu
+zu generieren. Derselbe Namespace speichert außerdem die Kundendatensätze
+für verkaufte Agenten (Präfix `customer:`).
 
 1. Auf der Worker-Seite: **Settings → Bindings** → **Add binding**.
 2. Typ **KV Namespace** auswählen.
@@ -60,10 +72,10 @@ generieren.
    so — der Code sucht danach).
 5. Speichern.
 
-## Schritt 4 — Täglichen Cron-Trigger einrichten (neu)
+## Schritt 4 — Täglichen Cron-Trigger einrichten
 
-Damit der Marketing-Agent jeden Morgen automatisch neuen Content
-generiert, ohne dass du etwas anklicken musst:
+Damit der Marketing-Agent und der Content-Creator-Agent jeden Morgen
+automatisch neuen Content generieren, ohne dass du etwas anklicken musst:
 
 1. Auf der Worker-Seite: Tab **Triggers** (oder **Settings → Triggers**).
 2. Unter **Cron Triggers** auf **Add Cron Trigger** klicken.
@@ -76,8 +88,9 @@ generiert, ohne dass du etwas anklicken musst:
 1. Falls noch nicht geschehen: `assets/chat-widget.js` öffnen, ganz oben
    `MV_CHAT_WORKER_URL` mit deiner Worker-URL befüllen (siehe unten für
    Widget-Details).
-2. Öffne `content.html` im Projekt-Root und trage oben im `<script>`
-   dieselbe Worker-URL bei `WORKER_URL` ein — ist standardmäßig schon auf
+2. Öffne `content.html`, `ceo.html`, `creator.html` und `research.html`
+   im Projekt-Root — in jeder Datei steht oben im `<script>` dieselbe
+   `WORKER_URL`. Standardmäßig schon auf
    `https://monovri-lead-agent.monovri-agency.workers.dev` gesetzt, falls
    das dein Worker-Name/Subdomain ist, musst du nichts ändern.
 3. Optional, empfohlen sobald alles läuft: unter **Settings → Variables
@@ -102,6 +115,18 @@ Content generiert wurde, erzeugt die Seite beim ersten Laden automatisch
 eine erste Charge. Mit **"🔄 Neu generieren"** kannst du jederzeit eine
 neue Version anfordern, statt auf den nächsten Cron-Lauf zu warten.
 
+**CEO-Assistent:** `ceo.html` öffnen (live unter
+`https://monovri.github.io/MonovriAI/ceo.html`), Frage eintippen.
+
+**Content-Creator-Agent:** `creator.html` öffnen (live unter
+`https://monovri.github.io/MonovriAI/creator.html`) — funktioniert genau
+wie das Marketing-Dashboard, nur mit Blog-Outline + Video-Skripten statt
+Social-Post-Entwürfen.
+
+**Research-Agent:** `research.html` öffnen (live unter
+`https://monovri.github.io/MonovriAI/research.html`), Recherche-Frage
+eintippen.
+
 Fehlermeldungen:
 - *"missing AI binding"* → Schritt 2 fehlt.
 - *"missing CONTENT_KV binding"* → Schritt 3 fehlt.
@@ -114,6 +139,13 @@ Fehlermeldungen:
   `worker.js`.
 - **Content-Stil/Themen (Marketing-Agent) ändern:** `MARKETING_SYSTEM_PROMPT`
   in `worker.js` — z.B. andere Anzahl Posts, andere Sprache, anderer Ton.
+- **Ton/Kontext (CEO-Assistent) ändern:** `CEO_SYSTEM_PROMPT` in
+  `worker.js`.
+- **Themen/Format (Content-Creator-Agent) ändern:** `CREATOR_SYSTEM_PROMPT`
+  in `worker.js` — z.B. andere Anzahl Blog-Outlines/Video-Skripte, andere
+  Plattformen.
+- **Fokus (Research-Agent) ändern:** `RESEARCH_SYSTEM_PROMPT` in
+  `worker.js`.
 - **Cron-Zeitpunkt ändern:** Im Dashboard unter Triggers, oder in
   `wrangler.toml` bei CLI-Deployment.
 - **Anderes (kostenloses) Modell:** Konstante `MODEL` in `worker.js` —
