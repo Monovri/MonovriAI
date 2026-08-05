@@ -50,6 +50,21 @@ Rules:
 - Rotate topics across AI agents, voice AI, workflow automation, CRM automation, and common myths about AI adoption — don't repeat the same angle every time.
 - Never invent fake statistics, client names, or testimonials.`;
 
+const CEO_SYSTEM_PROMPT = `You are the AI Chief of Staff for the founder of Monovri AI, a solo-founder European AI automation agency that is pre-revenue/early-stage and expanding internationally (starting DACH, targeting US/UK next).
+
+Context about the business:
+- Products: AI Agents (chat widgets embedded on customer websites), Voice AI, Workflow Automation, CRM Automation, and a marketing content agent — sold as a monthly subscription bundle via Stripe.
+- Current stage: technical foundation (sales agent, marketing content agent, payment + automated customer provisioning) is built and tested in Stripe test mode. Not yet legally ready to sell — the founder still needs to update their Gewerbe registration (currently registered as Handelsvertreter, a different activity) and confirm Kleinunternehmer VAT status with a Steuerberater before going live.
+- Founder is a solo operator handling product, sales, and operations themselves.
+
+Your job:
+1. Think and answer like an experienced, no-nonsense Chief of Staff / strategic advisor — direct, concise, practical. No corporate fluff, no generic startup platitudes.
+2. Help with: market analysis, meeting prep, business reports, prioritization calls, and honest pushback when an idea is weak or premature.
+3. Ground advice in the actual context above — don't give generic advice that ignores the business's real stage (pre-revenue, solo founder, legal setup pending).
+4. Be honest about uncertainty or risk — never fabricate market data, statistics, or competitor facts you don't actually know. If you don't know something concrete, say so and suggest how to find out, rather than inventing numbers.
+5. Keep replies focused — a few sharp paragraphs or a short list, not walls of text, unless the founder explicitly asks for a detailed report.
+6. Mirror the language the founder writes in (German or English).`;
+
 function corsHeaders(origin, allowedOrigin) {
   const allowOrigin =
     allowedOrigin === "*" || origin === allowedOrigin ? origin || "*" : allowedOrigin;
@@ -68,7 +83,7 @@ function jsonResponse(data, status, cors) {
   });
 }
 
-async function handleChat(request, env, cors) {
+async function runSimpleChat(request, env, cors, systemPrompt, maxTokens) {
   if (!env.AI) {
     return jsonResponse({ error: "Server misconfigured: missing AI binding." }, 500, cors);
   }
@@ -100,14 +115,22 @@ async function handleChat(request, env, cors) {
   let aiResult;
   try {
     aiResult = await env.AI.run(MODEL, {
-      messages: [{ role: "system", content: SALES_SYSTEM_PROMPT }, ...messages],
-      max_tokens: 400,
+      messages: [{ role: "system", content: systemPrompt }, ...messages],
+      max_tokens: maxTokens,
     });
   } catch (e) {
     return jsonResponse({ error: "Upstream error", detail: String(e) }, 502, cors);
   }
 
   return jsonResponse({ reply: aiResult?.response || "" }, 200, cors);
+}
+
+async function handleChat(request, env, cors) {
+  return runSimpleChat(request, env, cors, SALES_SYSTEM_PROMPT, 400);
+}
+
+async function handleCeoChat(request, env, cors) {
+  return runSimpleChat(request, env, cors, CEO_SYSTEM_PROMPT, 700);
 }
 
 const CONTENT_LANGS = ["de", "en"];
@@ -455,6 +478,10 @@ export default {
     const chatMatch = url.pathname.match(/^\/chat\/([a-zA-Z0-9_]+)$/);
     if (chatMatch && request.method === "POST") {
       return handleCustomerChat(request, env, cors, chatMatch[1]);
+    }
+
+    if (url.pathname === "/ceo/chat" && request.method === "POST") {
+      return handleCeoChat(request, env, cors);
     }
 
     if (url.pathname === "/content/generate" && request.method === "GET") {
