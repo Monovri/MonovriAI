@@ -1076,10 +1076,11 @@ async function handleStripeWebhook(request, env) {
     if (stripeCustomerId) customer.stripeCustomerId = stripeCustomerId;
 
     customer.productSources = customer.productSources || {};
+    const paymentIntentId = session.payment_intent || null;
     for (const product of purchasedProducts) {
       customer.productSources[product] = subscriptionId
         ? { type: "subscription", subscriptionId }
-        : { type: "one_time" };
+        : { type: "one_time", paymentIntentId };
     }
     recomputeCustomerProducts(customer);
 
@@ -1111,28 +1112,48 @@ ${sections.join("\n")}
 
   if (event.type === "customer.subscription.deleted") {
     const subscription = event.data.object;
-    if (env.CONTENT_KV) {
-      const customerId = await findCustomerIdByStripeCustomer(env, subscription.customer);
-      if (customerId) {
-        const customer = await getCustomer(env, customerId);
-        if (customer?.productSources) {
-          let changed = false;
-          for (const [product, source] of Object.entries(customer.productSources)) {
-            if (source.type === "subscription" && source.subscriptionId === subscription.id) {
-              delete customer.productSources[product];
-              changed = true;
-            }
-          }
-          if (changed) {
-            recomputeCustomerProducts(customer);
-            await saveCustomer(env, customerId, customer);
-          }
-        }
-      }
+    await revokeProductsBySource(
+      env,
+      subscription.customer,
+      (source) => source.type === "subscription" && source.subscriptionId === subscription.id
+    );
+  }
+
+  // A fully refunded one-time purchase is a cancelled sale, same as a
+  // cancelled subscription — revoke exactly the product(s) that came from
+  // this specific charge, not the customer's other unrelated purchases.
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object;
+    if (charge.refunded) {
+      await revokeProductsBySource(
+        env,
+        charge.customer,
+        (source) => source.type === "one_time" && source.paymentIntentId === charge.payment_intent
+      );
     }
   }
 
   return new Response("ok", { status: 200 });
+}
+
+async function revokeProductsBySource(env, stripeCustomerId, matches) {
+  if (!env.CONTENT_KV || !stripeCustomerId) return;
+  const customerId = await findCustomerIdByStripeCustomer(env, stripeCustomerId);
+  if (!customerId) return;
+  const customer = await getCustomer(env, customerId);
+  if (!customer?.productSources) return;
+
+  let changed = false;
+  for (const [product, source] of Object.entries(customer.productSources)) {
+    if (matches(source)) {
+      delete customer.productSources[product];
+      changed = true;
+    }
+  }
+  if (changed) {
+    recomputeCustomerProducts(customer);
+    await saveCustomer(env, customerId, customer);
+  }
 }
 
 async function handleResendAccess(request, env, cors) {
