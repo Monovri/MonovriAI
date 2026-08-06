@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Monovri AI — Preise & Pakete</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/chat-widget.css">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -50,7 +51,8 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
 <div class="wrap">
   <div class="hero">
     <h1>Preise & Pakete</h1>
-    <p class="hero-sub">KI-Agenten für dein Unternehmen — einzeln buchbar oder im Paket. Kostenloses 30-Minuten Discovery Call vorab möglich.</p>
+    <p class="hero-sub">KI-Agenten für dein Unternehmen — einzeln buchbar oder im Paket. <a href="https://wa.me/491608359987" target="_blank" rel="noopener" style="color:var(--gold);font-weight:600">Kostenloses 30-Minuten Discovery Call vorab buchen →</a></p>
+    <p class="hero-sub" style="margin-top:-20px">Unsicher, ob es zu dir passt? <a href="#" onclick="document.getElementById('mv-chat-btn')?.click();return false" style="color:var(--gold);font-weight:600">Probier unseren eigenen Chat-Agenten direkt hier aus</a> — er läuft mit derselben Technik wie die Pakete unten.</p>
   </div>
 
   <div class="toggle">
@@ -127,7 +129,7 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
     </div>
   </div>
 
-  <p class="note">Alle Preise zzgl. ggf. anfallender USt. Monatliche Abos jederzeit kündbar. Einmalig = einmalige Einrichtung ohne laufenden Support/Updates.</p>
+  <p class="note">Alle Preise zzgl. ggf. anfallender USt. Monatliche Abos jederzeit kündbar. Einmalig = einmalige Einrichtung ohne laufenden Support/Updates. Nicht zufrieden? Schreib uns einfach — bei berechtigten Fällen erstatten wir zurück.</p>
 </div>
 
 <script>
@@ -179,5 +181,6 @@ btnMonthly.addEventListener('click', function () { mode = 'monthly'; render(); }
 btnOnce.addEventListener('click', function () { mode = 'once'; render(); });
 render();
 </script>
+<script src="assets/chat-widget.js"></script>
 </body>
 </html>
