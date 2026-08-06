@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Monovri AI — Zugänge erneut anfordern</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#050505;--surface:rgba(255,255,255,0.03);--line:rgba(255,255,255,0.1);
+  --gold:#F5A800;--gold-subtle:rgba(245,168,0,0.08);--white:#fff;--muted:#8a8a8a;
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--ink);color:var(--white);min-height:100vh;padding:40px 20px 80px;line-height:1.5}
+.wrap{max-width:480px;margin:0 auto}
+h1{font-size:24px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:32px}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}
+input{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;color:#fff;font:400 14px/1.4 'Inter',sans-serif;outline:none}
+input:focus{border-color:rgba(245,168,0,0.4)}
+input::placeholder{color:#555}
+button{font-family:inherit;cursor:pointer}
+.submit{margin-top:20px;background:var(--gold);color:#000;border:none;font-weight:700;font-size:14px;padding:13px 20px;border-radius:10px;width:100%;transition:transform .15s}
+.submit:hover{transform:translateY(-1px)}
+.submit:disabled{opacity:.5;cursor:default;transform:none}
+.msg{margin-top:20px;padding:14px 16px;border-radius:10px;font-size:13.5px}
+.msg.ok{background:rgba(61,220,132,0.1);color:#3ddc84;border:1px solid rgba(61,220,132,0.3)}
+.msg.err{background:rgba(255,80,80,0.1);color:#ff8080;border:1px solid rgba(255,80,80,0.3)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🔑 Zugänge erneut anfordern</h1>
+  <p class="sub">Mail verloren oder gelöscht? Gib deine E-Mail-Adresse ein — falls sie bei uns als Kunde bekannt ist, schicken wir dir gleich alle deine aktuellen Zugänge erneut zu.</p>
+
+  <div id="form">
+    <label for="email">E-Mail-Adresse</label>
+    <input id="email" type="email" placeholder="deine@email.de">
+    <button class="submit" id="submitBtn">Zugänge zusenden</button>
+  </div>
+  <div id="result"></div>
+</div>
+
+<script>
+var WORKER_URL = "https://monovri-lead-agent.monovri-agency.workers.dev";
+var emailEl = document.getElementById('email');
+var resultEl = document.getElementById('result');
+var submitBtn = document.getElementById('submitBtn');
+
+submitBtn.addEventListener('click', function () {
+  var email = emailEl.value.trim();
+  if (!email) return;
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Sende…';
+
+  fetch(WORKER_URL + '/access/resend', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email }),
+  })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      resultEl.innerHTML = '<div class="msg ok">' + (data.message || 'Falls diese E-Mail-Adresse bei uns bekannt ist, kommt gleich eine Mail.') + '</div>';
+    })
+    .catch(function () {
+      resultEl.innerHTML = '<div class="msg err">Konnte den Server nicht erreichen. Bitte später erneut versuchen.</div>';
+    })
+    .finally(function () {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Zugänge zusenden';
+    });
+});
+</script>
+</body>
+</html>

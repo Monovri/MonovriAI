@@ -178,7 +178,8 @@ function renderError(msg, needsSetup) {
 
 function load(path) {
   if (!customerId) {
-    renderError('Kein Kunden-Link erkannt. Bitte nutz den Link aus deiner Willkommens-E-Mail.');
+    dateEl.textContent = '';
+    contentEl.innerHTML = '<p class="error">Kein Kunden-Link erkannt. Bitte nutz den Link aus deiner Willkommens-E-Mail — oder <a class="setup-link" href="zugriff.html">hier erneut anfordern</a>.</p>';
     return;
   }
   contentEl.innerHTML = '<p class="loading">Content wird geladen…</p>';
