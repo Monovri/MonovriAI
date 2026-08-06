@@ -67,7 +67,7 @@ var submitBtn = document.getElementById('submitBtn');
 
 if (!customerId) {
   formEl.style.display = 'none';
-  resultEl.innerHTML = '<div class="msg err">Kein Kunden-Link erkannt. Bitte nutz den Link aus deiner Willkommens-E-Mail.</div>';
+  resultEl.innerHTML = '<div class="msg err">Kein Kunden-Link erkannt. Bitte nutz den Link aus deiner Willkommens-E-Mail — oder <a href="zugriff.html" style="color:#F5A800">hier erneut anfordern</a>.</div>';
 }
 
 submitBtn.addEventListener('click', function () {
