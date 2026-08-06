@@ -805,7 +805,7 @@ async function sendResendEmail(env, { to, subject, html }) {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from: env.RESEND_FROM || "Monovri AI <onboarding@resend.dev>",
+      from: env.RESEND_FROM || "Monovri AI <support@monovriai.com>",
       to: [to],
       subject,
       html,
