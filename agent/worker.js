@@ -790,6 +790,13 @@ async function handleCustomerKundenserviceChat(request, env, cors, customerId) {
 
 const VAPI_VOICE_ID_SARAH = "EXAVITQu4vr4xnSDxMaL"; // ElevenLabs "Sarah" — matches the voice validated manually for Monovri's own agent.
 
+// Vapi's free "vapi" phone number provider only issues US numbers and
+// requires a desired area code (or a SIP URI) — there's no "just give me a
+// number" option. This is a US number regardless of which area code is
+// picked; getting real German/EU numbers per customer would need a BYO
+// provider (e.g. Twilio) with a purchased local number instead.
+const VAPI_NUMBER_AREA_CODE = "415";
+
 function customerVoiceSystemPrompt(customer) {
   const p = customer.profile || {};
   const today = new Date().toISOString().slice(0, 10);
@@ -978,6 +985,7 @@ async function provisionVoiceAgent(env, customer, customerId, workerOrigin) {
 
   const phoneNumber = await vapiApi(env, "/phone-number", "POST", {
     provider: "vapi",
+    numberDesiredAreaCode: VAPI_NUMBER_AREA_CODE,
     assistantId: assistant.id,
   });
 
@@ -1108,6 +1116,7 @@ async function provisionCloserAgent(env, customer, customerId, workerOrigin) {
 
   const phoneNumber = await vapiApi(env, "/phone-number", "POST", {
     provider: "vapi",
+    numberDesiredAreaCode: VAPI_NUMBER_AREA_CODE,
     assistantId: assistant.id,
   });
 
