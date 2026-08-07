@@ -14,7 +14,8 @@
  *  7. Operations Agent          — POST /operations/chat (operations.html)
  *  8. Finance Agent             — POST /finance/chat, GET /finance/overview (finance.html)
  *  9. Customer chat agents      — POST /chat/:id, GET /widget/:id.js (multi-tenant, sold to clients)
- *                                 scheduled()           (daily cron, see wrangler.toml)
+ *                                 scheduled()           (daily cron, see wrangler.toml — also
+ *                                 runs the monthly Voice-Agent/KI-Closer overage billing sweep)
  *
  * No external API key needed: Workers AI runs open-source models directly
  * on Cloudflare's infrastructure, bound to this Worker via the `AI`
@@ -821,6 +822,35 @@ async function vapiApi(env, path, method, body) {
   return data;
 }
 
+// Stripe's REST API takes classic form-encoded bodies (not JSON), including
+// for nested fields via bracket notation in the key itself, e.g.
+// "invoice_settings[default_payment_method]".
+async function stripeApi(env, path, method, params) {
+  const form = new URLSearchParams();
+  for (const [k, v] of Object.entries(params || {})) {
+    if (v !== undefined && v !== null) form.append(k, String(v));
+  }
+  const res = await fetch(`https://api.stripe.com/v1${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: method === "GET" ? undefined : form.toString(),
+  });
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { raw: text };
+  }
+  if (!res.ok) {
+    throw new Error(`Stripe API ${method} ${path} failed (${res.status}): ${text}`);
+  }
+  return data;
+}
+
 const CALCOM_API_BASE = "https://api.cal.com/v1";
 
 function isLikelyEmail(str) {
@@ -1564,7 +1594,7 @@ async function handleCallEnded(request, env, customerId, opts) {
           subject: `📞 ${productLabel} Freiminuten überschritten: ${customer.companyName}`,
           html: `<p><strong>${customer.companyName}</strong> (${customer.email || "keine E-Mail"}) hat diesen Monat (${monthKey}) beim ${productLabel} die inkludierten ${includedMinutes} Freiminuten überschritten.</p>
 <p>Bisher genutzt: <strong>${newTotal} Minuten</strong> — Overage: ${overageMinutes} Minuten × ${overageRate}€ = <strong>${overageCost}€</strong>.</p>
-<p>Bitte die Overage-Gebühr manuell nachberechnen (z. B. separate Stripe-Rechnung), bis das automatisiert läuft.</p>`,
+<p>Wird automatisch am 1. des Folgemonats per Stripe-Rechnung abgerechnet — hier nur zur Info, keine Aktion nötig (außer der Kunde hat keine hinterlegte Zahlungsmethode, dann kommt separat eine Fehler-Mail).</p>`,
         });
       } catch (e) {
         console.error(`${productLabel} overage notification failed:`, e);
@@ -1591,6 +1621,106 @@ async function handleCloserCallEnded(request, env, customerId) {
     usageKvPrefix: CLOSER_USAGE_KV_PREFIX,
     productLabel: "KI Closer",
   });
+}
+
+// Runs daily from the cron trigger but only acts on the 1st of the month,
+// billing the previous month's overage minutes automatically instead of
+// relying on the founder to manually invoice every customer — necessary
+// once volumes reach hundreds/thousands of minutes a month. Charges the
+// customer's Stripe default payment method (their subscription card, or —
+// for one-time buyers — the card saved via setup_future_usage at checkout).
+async function runOverageBilling(env) {
+  if (!env.STRIPE_SECRET_KEY || !env.CONTENT_KV) return;
+
+  const today = new Date();
+  if (today.getUTCDate() !== 1) return;
+
+  const monthKey = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 1, 1))
+    .toISOString()
+    .slice(0, 7);
+
+  const billableProducts = [
+    {
+      product: PRODUCT_VOICE,
+      includedMinutes: VOICE_INCLUDED_MINUTES,
+      overageRate: VOICE_OVERAGE_RATE_EUR,
+      usageKvPrefix: VOICE_USAGE_KV_PREFIX,
+      label: "Voice-Agent",
+    },
+    {
+      product: PRODUCT_CLOSER,
+      includedMinutes: CLOSER_INCLUDED_MINUTES,
+      overageRate: CLOSER_OVERAGE_RATE_EUR,
+      usageKvPrefix: CLOSER_USAGE_KV_PREFIX,
+      label: "KI Closer",
+    },
+  ];
+
+  let cursor;
+  do {
+    const page = await env.CONTENT_KV.list({ prefix: CUSTOMER_KV_PREFIX, cursor });
+    cursor = page.cursor;
+
+    for (const key of page.keys) {
+      const customerId = key.name.slice(CUSTOMER_KV_PREFIX.length);
+      const customer = await getCustomer(env, customerId);
+      if (!customer?.stripeCustomerId) continue;
+
+      for (const cfg of billableProducts) {
+        if (!customer.products?.includes(cfg.product)) continue;
+
+        const usageKey = `${cfg.usageKvPrefix}${customerId}:${monthKey}`;
+        const invoicedKey = `billed:${usageKey}`;
+        if (await env.CONTENT_KV.get(invoicedKey)) continue;
+
+        const totalMinutes = parseInt((await env.CONTENT_KV.get(usageKey)) || "0", 10);
+        const overageMinutes = Math.max(0, totalMinutes - cfg.includedMinutes);
+        if (overageMinutes <= 0) continue;
+
+        const amountCents = Math.round(overageMinutes * cfg.overageRate * 100);
+
+        try {
+          await stripeApi(env, "/invoiceitems", "POST", {
+            customer: customer.stripeCustomerId,
+            currency: "eur",
+            amount: amountCents,
+            description: `${cfg.label} Nutzung ${monthKey}: ${overageMinutes} Minuten über den ${cfg.includedMinutes} Freiminuten (${cfg.overageRate}€/Min)`,
+          });
+          const invoice = await stripeApi(env, "/invoices", "POST", {
+            customer: customer.stripeCustomerId,
+            collection_method: "charge_automatically",
+            auto_advance: "true",
+            description: `${customer.companyName} — ${cfg.label} Nutzungsgebühr ${monthKey}`,
+          });
+          await env.CONTENT_KV.put(invoicedKey, String(invoice.id), {
+            expirationTtl: 60 * 60 * 24 * 400,
+          });
+
+          if (env.FOUNDER_EMAIL && env.RESEND_API_KEY) {
+            await sendResendEmail(env, {
+              to: env.FOUNDER_EMAIL,
+              subject: `💳 ${cfg.label} Nutzungsrechnung erstellt: ${customer.companyName}`,
+              html: `<p><strong>${customer.companyName}</strong> hat im ${monthKey} beim ${cfg.label} ${overageMinutes} Minuten über die Freiminuten telefoniert.</p>
+<p>Automatische Stripe-Rechnung über <strong>${(amountCents / 100).toFixed(2)}€</strong> wurde erstellt und wird automatisch vom hinterlegten Zahlungsmittel eingezogen.</p>`,
+            });
+          }
+        } catch (e) {
+          console.error(`Overage billing failed for ${customerId}/${cfg.product}:`, e);
+          if (env.FOUNDER_EMAIL && env.RESEND_API_KEY) {
+            try {
+              await sendResendEmail(env, {
+                to: env.FOUNDER_EMAIL,
+                subject: `⚠️ Automatische Nutzungsrechnung fehlgeschlagen: ${customer.companyName}`,
+                html: `<p>Für <strong>${customer.companyName}</strong> (${cfg.label}, ${monthKey}, ${overageMinutes} Min Überschreitung = ${(amountCents / 100).toFixed(2)}€) konnte keine automatische Stripe-Rechnung erstellt/abgebucht werden.</p>
+<p>Fehler: ${String(e)}</p>
+<p>Bitte manuell prüfen (z. B. fehlende oder abgelehnte Zahlungsmethode) und ggf. per Hand nachberechnen.</p>`,
+              });
+            } catch {}
+          }
+        }
+      }
+    }
+  } while (cursor);
 }
 
 const SITE_ORIGIN = "https://monovriai.com";
@@ -1723,6 +1853,23 @@ async function handleStripeWebhook(request, env) {
     await saveCustomer(env, customerId, customer);
     await indexCustomerEmail(env, email, customerId);
     if (stripeCustomerId) await indexStripeCustomer(env, stripeCustomerId, customerId);
+
+    // A one-time purchase (e.g. KI Closer's €6000 build) still carries real
+    // ongoing per-minute call costs — save the card used at checkout as the
+    // customer's default so future overage can be invoiced automatically
+    // instead of relying on a payment method that was never attached.
+    if (!subscriptionId && stripeCustomerId && paymentIntentId && env.STRIPE_SECRET_KEY) {
+      try {
+        const pi = await stripeApi(env, `/payment_intents/${paymentIntentId}`, "GET");
+        if (pi.payment_method) {
+          await stripeApi(env, `/customers/${stripeCustomerId}`, "POST", {
+            "invoice_settings[default_payment_method]": pi.payment_method,
+          });
+        }
+      } catch (e) {
+        console.error("Failed to save default payment method for future overage billing:", e);
+      }
+    }
 
     const workerOrigin = new URL(request.url).origin;
     const sections = buildCustomerAccessSections(customer, customerId, workerOrigin);
@@ -1995,5 +2142,6 @@ export default {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(generateMarketingContent(env));
     ctx.waitUntil(generateCreatorContent(env));
+    ctx.waitUntil(runOverageBilling(env));
   },
 };
