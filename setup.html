@@ -115,16 +115,17 @@ submitBtn.addEventListener('click', function () {
         return;
       }
       formEl.style.display = 'none';
+      function esc(s) { var d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
       var extra = '';
       if (r.data.voice && r.data.voice.phoneNumber) {
         extra = '<br><br>📞 Deine Voice-Agent-Nummer: <strong>' + r.data.voice.phoneNumber + '</strong> — leite deine bestehende Nummer bei Nichtannahme/Besetzt dorthin weiter (Anleitung kommt per separater Mail).';
       } else if (r.data.voiceError) {
-        extra = '<br><br>⚠️ Dein Voice-Agent konnte noch nicht automatisch eingerichtet werden. Wir melden uns manuell bei dir.';
+        extra = '<br><br>⚠️ Dein Voice-Agent konnte noch nicht automatisch eingerichtet werden. Wir melden uns manuell bei dir.<br><span style="font-size:11px;color:#888;font-family:monospace">' + esc(r.data.voiceError) + '</span>';
       }
       if (r.data.closer && r.data.closer.closerPhoneNumber) {
         extra += '<br><br>🎯 Dein KI Closer ist eingerichtet — Anleitung zum Verbinden mit deinem Lead-Formular kommt per separater Mail.';
       } else if (r.data.closerError) {
-        extra += '<br><br>⚠️ Dein KI Closer konnte noch nicht automatisch eingerichtet werden. Wir melden uns manuell bei dir.';
+        extra += '<br><br>⚠️ Dein KI Closer konnte noch nicht automatisch eingerichtet werden. Wir melden uns manuell bei dir.<br><span style="font-size:11px;color:#888;font-family:monospace">' + esc(r.data.closerError) + '</span>';
       }
       resultEl.innerHTML = '<div class="msg ok">✓ Gespeichert! Deine Inhalte/Antwortentwürfe werden ab jetzt darauf abgestimmt. Du kannst die Links aus deiner Willkommens-Mail jetzt nutzen.' + extra + '</div>';
     })
