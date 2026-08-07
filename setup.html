@@ -57,6 +57,17 @@ button{font-family:inherit;cursor:pointer}
     <label for="notifyEmail">E-Mail für Terminbenachrichtigungen (nur falls du den Voice-Agent oder KI Closer gebucht hast)</label>
     <input id="notifyEmail" type="email" placeholder="team@deine-firma.de">
 
+    <label for="calcomApiKey">Cal.com API-Key (optional, nur Voice-Agent/KI Closer) — für automatische Terminbuchung direkt in deinen Kalender</label>
+    <input id="calcomApiKey" type="text" placeholder="cal_live_...">
+    <div class="hint">Findest du in Cal.com unter Settings → Developer → API Keys. Ohne API-Key wird der Termin stattdessen per E-Mail an dich zur manuellen Eintragung geschickt.</div>
+
+    <label for="calcomEventTypeId">Cal.com Event-Type-ID (optional, nur zusammen mit dem API-Key)</label>
+    <input id="calcomEventTypeId" type="text" placeholder="z.B. 123456">
+    <div class="hint">Findest du in der URL deines Event-Types in Cal.com unter Event Types → dein Termin-Typ → Einstellungen.</div>
+
+    <label for="timezone">Zeitzone (nur Voice-Agent/KI Closer)</label>
+    <input id="timezone" type="text" value="Europe/Berlin">
+
     <button class="submit" id="submitBtn">Speichern</button>
   </div>
   <div id="result"></div>
@@ -85,6 +96,9 @@ submitBtn.addEventListener('click', function () {
     description: document.getElementById('description').value.trim(),
     brandColor: document.getElementById('brandColor').value.trim(),
     notifyEmail: document.getElementById('notifyEmail').value.trim(),
+    calcomApiKey: document.getElementById('calcomApiKey').value.trim(),
+    calcomEventTypeId: document.getElementById('calcomEventTypeId').value.trim(),
+    timezone: document.getElementById('timezone').value.trim(),
   };
 
   fetch(WORKER_URL + '/setup/' + customerId, {
