@@ -153,6 +153,14 @@ function corsHeaders(origin, allowedOrigin) {
   };
 }
 
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function jsonResponse(data, status, cors) {
   return new Response(JSON.stringify(data), {
     status,
@@ -202,8 +210,83 @@ async function runSimpleChat(request, env, cors, systemPrompt, maxTokens) {
   return jsonResponse({ reply: aiResult?.response || "" }, 200, cors);
 }
 
-async function handleChat(request, env, cors) {
-  return runSimpleChat(request, env, cors, SALES_SYSTEM_PROMPT, 400);
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+
+async function sendLeadNotification(env, messages, leadEmail) {
+  const to = env.FOUNDER_EMAIL;
+  if (!to || !env.RESEND_API_KEY) return;
+
+  const transcript = messages
+    .map((m) => `<p><strong>${m.role === "user" ? "Interessent" : "Bot"}:</strong> ${escapeHtml(m.content)}</p>`)
+    .join("\n");
+
+  try {
+    await sendResendEmail(env, {
+      to,
+      subject: `🎯 Neuer Lead über den Website-Chat (${leadEmail})`,
+      html: `<p>Ein Interessent hat im Sales-Chat auf der Website seine E-Mail-Adresse hinterlassen: <strong>${escapeHtml(leadEmail)}</strong></p>
+<p>Gesprächsverlauf:</p>
+${transcript}`,
+    });
+  } catch (e) {
+    console.error("Lead notification failed:", e);
+  }
+}
+
+async function handleChat(request, env, cors, ctx) {
+  if (!env.AI) {
+    return jsonResponse({ error: "Server misconfigured: missing AI binding." }, 500, cors);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonResponse({ error: "Invalid JSON body." }, 400, cors);
+  }
+
+  const incoming = Array.isArray(body.messages) ? body.messages : [];
+  const messages = incoming
+    .filter(
+      (m) =>
+        m &&
+        (m.role === "user" || m.role === "assistant") &&
+        typeof m.content === "string" &&
+        m.content.trim().length > 0 &&
+        m.content.length <= 4000
+    )
+    .slice(-MAX_HISTORY_MESSAGES)
+    .map((m) => ({ role: m.role, content: m.content.trim() }));
+
+  if (messages.length === 0 || messages[messages.length - 1].role !== "user") {
+    return jsonResponse({ error: "No user message provided." }, 400, cors);
+  }
+
+  let aiResult;
+  try {
+    aiResult = await env.AI.run(MODEL, {
+      messages: [{ role: "system", content: SALES_SYSTEM_PROMPT }, ...messages],
+      max_tokens: 400,
+    });
+  } catch (e) {
+    return jsonResponse({ error: "Upstream error", detail: String(e) }, 502, cors);
+  }
+
+  const reply = aiResult?.response || "";
+
+  // The lead's email only ever appears in the message where they just typed
+  // it, so this fires exactly once per conversation instead of re-notifying
+  // on every later turn (which would still contain it in the history).
+  const lastUserMessage = messages[messages.length - 1].content;
+  const emailMatch = lastUserMessage.match(EMAIL_REGEX);
+  if (emailMatch) {
+    const fullTranscript = [...messages, { role: "assistant", content: reply }];
+    const task = sendLeadNotification(env, fullTranscript, emailMatch[0]);
+    if (ctx?.waitUntil) ctx.waitUntil(task);
+    else await task;
+  }
+
+  return jsonResponse({ reply }, 200, cors);
 }
 
 async function handleCeoChat(request, env, cors) {
@@ -1204,7 +1287,7 @@ ${sections.join("\n")}
 }
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const origin = request.headers.get("Origin") || "";
     const allowedOrigin = env.ALLOWED_ORIGIN || "*";
@@ -1319,7 +1402,7 @@ export default {
     }
 
     if (url.pathname === "/" && request.method === "POST") {
-      return handleChat(request, env, cors);
+      return handleChat(request, env, cors, ctx);
     }
 
     return jsonResponse({ error: "Not found" }, 404, cors);
