@@ -36,8 +36,7 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
 .cta{font-family:inherit;cursor:pointer;text-align:center;text-decoration:none;display:block;background:var(--gold);color:#000;font-weight:700;font-size:13.5px;padding:12px 16px;border-radius:10px;border:none;transition:transform .15s}
 .cta:hover{transform:translateY(-1px)}
 .cta.disabled{background:var(--surface);color:var(--muted);border:1px solid var(--line);cursor:default;pointer-events:none}
-.items{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px}
-@media(max-width:960px){.items{grid-template-columns:repeat(2,1fr)}}
+.items{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:40px}
 @media(max-width:520px){.items{grid-template-columns:1fr}}
 .item{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
 .item-name{font-weight:700;font-size:14px;margin-bottom:4px}
@@ -117,6 +116,12 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
       <div class="item-desc">KI-Telefonagent für Terminbuchungen und Anfragen. Inkl. 200 Freiminuten/Monat, danach 0,45€/Minute. Nur im Abo verfügbar.</div>
       <a class="cta" data-link-key="voice">Jetzt buchen</a>
     </div>
+    <div class="item">
+      <div class="item-name">🎯 KI Closer</div>
+      <div class="item-price"><span class="amt" data-monthly="249" data-once="">249€</span> <span class="unit" data-unit>/ Monat</span></div>
+      <div class="item-desc">Ruft neue Anfragen von deiner Website/deinem Formular automatisch in unter 60 Sekunden zurück, qualifiziert den Lead per KI-Stimme und bucht direkt den Termin — bevor der Wettbewerb überhaupt reagiert hat. Nur für deine eigenen, bereits eingehenden Leads (kein Kaltakquise). Inkl. 150 Freiminuten/Monat, danach 0,55€/Minute. Nur im Abo verfügbar.</div>
+      <a class="cta" data-link-key="closer">Jetzt buchen</a>
+    </div>
   </div>
 
   <p class="note">Alle Preise zzgl. ggf. anfallender USt. Monatliche Abos jederzeit kündbar. Einmalig = einmalige Einrichtung ohne laufenden Support/Updates. Nicht zufrieden? Schreib uns einfach — bei berechtigten Fällen erstatten wir zurück.</p>
@@ -132,6 +137,7 @@ var LINKS = {
   content: { monthly: "https://buy.stripe.com/00w9AV3VG7d8beQf6Idwc02", once: "https://buy.stripe.com/8x25kF1Ny40W3Mof6Idwc03" },
   service: { monthly: "https://buy.stripe.com/5kQ00lak440W82Ee2Edwc04", once: "https://buy.stripe.com/fZu9AV0Juapker25w8dwc05" },
   voice: { monthly: "https://buy.stripe.com/14AfZj4ZKdBwer20bOdwc06", once: "" },
+  closer: { monthly: "https://buy.stripe.com/00w4gB0Ju2WSciU1fSdwc0e", once: "" },
 };
 
 var mode = 'monthly';
