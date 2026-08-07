@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://monovri.github.io/MonovriAI/sitemap.xml
+Sitemap: https://monovriai.com/sitemap.xml

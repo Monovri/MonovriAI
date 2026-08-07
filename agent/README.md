@@ -152,7 +152,7 @@ automatisch neuen Content generieren, ohne dass du etwas anklicken musst:
    das dein Worker-Name/Subdomain ist, musst du nichts ändern.
 3. Optional, empfohlen sobald alles läuft: unter **Settings → Variables
    and Secrets** eine Text-Variable `ALLOWED_ORIGIN` mit dem Wert
-   `https://monovri.github.io` hinzufügen, damit nur deine Website den
+   `https://monovriai.com` hinzufügen, damit nur deine Website den
    Sales-Agenten benutzen kann.
 4. Für den Voice-Agent (Telefon, bei Vapi): unter **Settings → Variables
    and Secrets** eine Text-Variable `FOUNDER_EMAIL` mit deiner
@@ -177,34 +177,34 @@ AI-Binding und Cron sind schon in `wrangler.toml` hinterlegt.)*
 Chat-Button klicken, eine Nachricht schreiben.
 
 **Marketing-Agent:** `content.html` im Browser öffnen (lokal oder live
-unter `https://monovri.github.io/MonovriAI/content.html` — die URL ist
+unter `https://monovriai.com/content.html` — die URL ist
 nicht verlinkt, du musst sie dir merken/bookmarken). Falls noch kein
 Content generiert wurde, erzeugt die Seite beim ersten Laden automatisch
 eine erste Charge. Mit **"🔄 Neu generieren"** kannst du jederzeit eine
 neue Version anfordern, statt auf den nächsten Cron-Lauf zu warten.
 
 **CEO-Assistent:** `ceo.html` öffnen (live unter
-`https://monovri.github.io/MonovriAI/ceo.html`), Frage eintippen.
+`https://monovriai.com/ceo.html`), Frage eintippen.
 
 **Content-Creator-Agent:** `creator.html` öffnen (live unter
-`https://monovri.github.io/MonovriAI/creator.html`) — funktioniert genau
+`https://monovriai.com/creator.html`) — funktioniert genau
 wie das Marketing-Dashboard, nur mit Blog-Outline + Video-Skripten statt
 Social-Post-Entwürfen.
 
 **Research-Agent:** `research.html` öffnen (live unter
-`https://monovri.github.io/MonovriAI/research.html`), Recherche-Frage
+`https://monovriai.com/research.html`), Recherche-Frage
 eintippen.
 
 **Kundenservice Co-Pilot:** `kundenservice.html` öffnen (live unter
-`https://monovri.github.io/MonovriAI/kundenservice.html`), eine
+`https://monovriai.com/kundenservice.html`), eine
 Kundennachricht einfügen, Antwortentwurf kopieren.
 
 **Operations-Agent:** `operations.html` öffnen (live unter
-`https://monovri.github.io/MonovriAI/operations.html`), Frage zu
+`https://monovriai.com/operations.html`), Frage zu
 Workflows/Priorisierung stellen.
 
 **Finance-Agent:** `finance.html` öffnen (live unter
-`https://monovri.github.io/MonovriAI/finance.html`) — zeigt oben echte
+`https://monovriai.com/finance.html`) — zeigt oben echte
 Kunden-/MRR-Zahlen aus deiner Kundendatenbank, darunter ein Finanz-Chat.
 
 **Kunden-Setup-Formular:** `setup.html?customer=TESTID` öffnen (mit einer

@@ -967,7 +967,7 @@ async function handleVoiceBooking(request, env, customerId) {
   });
 }
 
-const SITE_ORIGIN = "https://monovri.github.io/MonovriAI";
+const SITE_ORIGIN = "https://monovriai.com";
 
 // Shared between the purchase-confirmation email and the "resend my access"
 // flow, so a customer always sees the exact same links for whatever they

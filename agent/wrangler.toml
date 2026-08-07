@@ -19,6 +19,6 @@ crons = ["0 6 * * *"]
 
 # Restrict the widget to your real site origin once it's live, e.g.:
 # [vars]
-# ALLOWED_ORIGIN = "https://monovri.github.io"
+# ALLOWED_ORIGIN = "https://monovriai.com"
 #
 # Leave unset (defaults to "*") while testing locally.
