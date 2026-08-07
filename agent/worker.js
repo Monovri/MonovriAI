@@ -525,6 +525,14 @@ const PRODUCT_CONTENT = "content_agent";
 const PRODUCT_KUNDENSERVICE = "kundenservice_agent";
 const PRODUCT_VOICE = "voice_agent";
 
+// Voice-Agent calls carry real per-minute costs (Vapi/ElevenLabs/Deepgram/
+// OpenAI) billed to us. The plan includes a fair-use allowance; usage above
+// it is tracked so it can be billed as overage instead of silently eating
+// margin.
+const VOICE_INCLUDED_MINUTES = 200;
+const VOICE_OVERAGE_RATE_EUR = 0.45;
+const VOICE_USAGE_KV_PREFIX = "voice_usage:";
+
 function generateCustomerId() {
   return "cust_" + crypto.randomUUID().replace(/-/g, "").slice(0, 12);
 }
@@ -794,6 +802,8 @@ async function provisionVoiceAgent(env, customer, customerId, workerOrigin) {
       model: "nova-3",
       language: "multi",
     },
+    serverUrl: `${workerOrigin}/voice/call-ended/${customerId}`,
+    serverMessages: ["end-of-call-report"],
   });
 
   const phoneNumber = await vapiApi(env, "/phone-number", "POST", {
@@ -1048,6 +1058,66 @@ async function handleVoiceBooking(request, env, customerId) {
     status: 200,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+async function handleVoiceCallEnded(request, env, customerId) {
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response("ok", { status: 200 });
+  }
+
+  const message = body?.message || body || {};
+  if (message.type && message.type !== "end-of-call-report") {
+    return new Response("ok", { status: 200 });
+  }
+
+  const call = message.call || {};
+  let durationSeconds =
+    message.durationSeconds ?? message.duration ?? call.durationSeconds ?? null;
+  if (durationSeconds == null && call.startedAt && call.endedAt) {
+    durationSeconds = (new Date(call.endedAt) - new Date(call.startedAt)) / 1000;
+  }
+  if (durationSeconds == null && message.startedAt && message.endedAt) {
+    durationSeconds = (new Date(message.endedAt) - new Date(message.startedAt)) / 1000;
+  }
+  if (!durationSeconds || durationSeconds <= 0 || !env.CONTENT_KV) {
+    return new Response("ok", { status: 200 });
+  }
+
+  const customer = await getCustomer(env, customerId);
+  if (!customer) return new Response("ok", { status: 200 });
+
+  const minutes = Math.ceil(durationSeconds / 60);
+  const monthKey = new Date().toISOString().slice(0, 7);
+  const usageKey = `${VOICE_USAGE_KV_PREFIX}${customerId}:${monthKey}`;
+
+  const previousTotal = parseInt((await env.CONTENT_KV.get(usageKey)) || "0", 10);
+  const newTotal = previousTotal + minutes;
+  await env.CONTENT_KV.put(usageKey, String(newTotal));
+
+  // Notify once per month, right when this call pushes the customer over
+  // the included allowance — not on every subsequent call after that.
+  if (previousTotal <= VOICE_INCLUDED_MINUTES && newTotal > VOICE_INCLUDED_MINUTES) {
+    const overageMinutes = newTotal - VOICE_INCLUDED_MINUTES;
+    const overageCost = (overageMinutes * VOICE_OVERAGE_RATE_EUR).toFixed(2);
+    if (env.FOUNDER_EMAIL && env.RESEND_API_KEY) {
+      try {
+        await sendResendEmail(env, {
+          to: env.FOUNDER_EMAIL,
+          subject: `📞 Voice-Agent Freiminuten überschritten: ${customer.companyName}`,
+          html: `<p><strong>${customer.companyName}</strong> (${customer.email || "keine E-Mail"}) hat diesen Monat (${monthKey}) die inkludierten ${VOICE_INCLUDED_MINUTES} Freiminuten überschritten.</p>
+<p>Bisher genutzt: <strong>${newTotal} Minuten</strong> — Overage: ${overageMinutes} Minuten × ${VOICE_OVERAGE_RATE_EUR}€ = <strong>${overageCost}€</strong>.</p>
+<p>Bitte die Overage-Gebühr manuell nachberechnen (z. B. separate Stripe-Rechnung), bis das automatisiert läuft.</p>`,
+        });
+      } catch (e) {
+        console.error("Voice overage notification failed:", e);
+      }
+    }
+  }
+
+  return new Response("ok", { status: 200 });
 }
 
 const SITE_ORIGIN = "https://monovriai.com";
@@ -1356,6 +1426,11 @@ export default {
     const voiceBookingCustMatch = url.pathname.match(/^\/voice\/booking\/([a-zA-Z0-9_]+)$/);
     if (voiceBookingCustMatch && request.method === "POST") {
       return handleVoiceBooking(request, env, voiceBookingCustMatch[1]);
+    }
+
+    const voiceCallEndedMatch = url.pathname.match(/^\/voice\/call-ended\/([a-zA-Z0-9_]+)$/);
+    if (voiceCallEndedMatch && request.method === "POST") {
+      return handleVoiceCallEnded(request, env, voiceCallEndedMatch[1]);
     }
 
     const setupMatch = url.pathname.match(/^\/setup\/([a-zA-Z0-9_]+)$/);
