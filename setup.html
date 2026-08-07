@@ -50,6 +50,10 @@ button{font-family:inherit;cursor:pointer}
     <textarea id="description" rows="4" placeholder="Was bietest du an, was macht dich besonders?"></textarea>
     <div class="hint">Diese Angaben nutzen wir nur, um deine Inhalte/Antworten passend zu formulieren.</div>
 
+    <label for="brandColor">Markenfarbe für deinen Chat-Widget-Button (nur falls du den Chat-Agenten gebucht hast)</label>
+    <input id="brandColor" type="color" value="#F5A800" style="height:44px;padding:4px;cursor:pointer">
+    <div class="hint">Ersetzt die Standardfarbe im Chat-Button/-Header auf deiner Website.</div>
+
     <label for="notifyEmail">E-Mail für Terminbenachrichtigungen (nur falls du den Voice-Agent gebucht hast)</label>
     <input id="notifyEmail" type="email" placeholder="team@deine-firma.de">
 
@@ -79,6 +83,7 @@ submitBtn.addEventListener('click', function () {
     audience: document.getElementById('audience').value.trim(),
     tone: document.getElementById('tone').value.trim(),
     description: document.getElementById('description').value.trim(),
+    brandColor: document.getElementById('brandColor').value.trim(),
     notifyEmail: document.getElementById('notifyEmail').value.trim(),
   };
 
