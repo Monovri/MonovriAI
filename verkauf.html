@@ -123,8 +123,8 @@ h2{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin:0 0 20px;display
     </div>
     <div class="item">
       <div class="item-name">📞 Voice-Agent</div>
-      <div class="item-price"><span class="amt" data-monthly="179" data-once="1290">179€</span> <span class="unit" data-unit>/ Monat</span></div>
-      <div class="item-desc">KI-Telefonagent für Terminbuchungen und Anfragen.</div>
+      <div class="item-price"><span class="amt" data-monthly="179" data-once="">179€</span> <span class="unit" data-unit>/ Monat</span></div>
+      <div class="item-desc">KI-Telefonagent für Terminbuchungen und Anfragen. Nur im Abo verfügbar.</div>
       <a class="cta" data-link-key="voice">Jetzt buchen</a>
     </div>
   </div>
@@ -142,7 +142,7 @@ var LINKS = {
   chat: { monthly: "https://buy.stripe.com/9B628t77Sapk96I8Ikdwc00", once: "https://buy.stripe.com/00w8wRgIs40W82E2jWdwc01" },
   content: { monthly: "https://buy.stripe.com/00w9AV3VG7d8beQf6Idwc02", once: "https://buy.stripe.com/8x25kF1Ny40W3Mof6Idwc03" },
   service: { monthly: "https://buy.stripe.com/5kQ00lak440W82Ee2Edwc04", once: "https://buy.stripe.com/fZu9AV0Juapker25w8dwc05" },
-  voice: { monthly: "https://buy.stripe.com/14AfZj4ZKdBwer20bOdwc06", once: "https://buy.stripe.com/9B64gB4ZK7d84Qs9Modwc07" },
+  voice: { monthly: "https://buy.stripe.com/14AfZj4ZKdBwer20bOdwc06", once: "" },
 };
 
 var mode = 'monthly';
@@ -155,10 +155,16 @@ function render() {
 
   document.querySelectorAll('.amt').forEach(function (el) {
     var val = mode === 'monthly' ? el.dataset.monthly : el.dataset.once;
-    el.textContent = val + '€';
+    el.textContent = val ? val + '€' : '—';
   });
   document.querySelectorAll('[data-unit]').forEach(function (el) {
-    el.textContent = mode === 'monthly' ? '/ Monat' : 'einmalig';
+    var amt = el.parentElement.querySelector('.amt');
+    var hasOnce = amt && amt.dataset.once;
+    if (mode === 'once' && !hasOnce) {
+      el.textContent = 'nur im Abo';
+    } else {
+      el.textContent = mode === 'monthly' ? '/ Monat' : 'einmalig';
+    }
   });
   document.querySelectorAll('.cta[data-link-key]').forEach(function (el) {
     var key = el.dataset.linkKey;
@@ -171,7 +177,7 @@ function render() {
       el.classList.remove('disabled');
     } else {
       el.removeAttribute('href');
-      el.textContent = 'Bald verfügbar';
+      el.textContent = 'Nur im Abo verfügbar';
       el.classList.add('disabled');
     }
   });
