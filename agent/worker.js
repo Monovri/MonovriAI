@@ -657,6 +657,13 @@ async function handleSetupProfile(request, env, cors, customerId) {
       await sendVoiceForwardingEmail(env, customer, voice.phoneNumber);
     } catch (e) {
       console.error("Vapi provisioning failed:", e);
+      await notifyFounderOfIssue(
+        env,
+        `⚠️ Voice-Agent Einrichtung fehlgeschlagen: ${customer.companyName}`,
+        `<p><strong>${customer.companyName}</strong> (${customer.email || "keine E-Mail"}, Kunde ${customerId}) hat gerade das Setup-Formular ausgefüllt, aber die automatische Voice-Agent-Einrichtung ist fehlgeschlagen.</p>
+<p>Fehler: <code>${escapeHtml(String(e))}</code></p>
+<p>Bitte melde dich manuell beim Kunden.</p>`
+      );
       return jsonResponse(
         { ok: true, voiceError: String(e) },
         200,
@@ -679,6 +686,13 @@ async function handleSetupProfile(request, env, cors, customerId) {
       await sendCloserReadyEmail(env, customer, customerId, workerOrigin);
     } catch (e) {
       console.error("Vapi closer provisioning failed:", e);
+      await notifyFounderOfIssue(
+        env,
+        `⚠️ KI Closer Einrichtung fehlgeschlagen: ${customer.companyName}`,
+        `<p><strong>${customer.companyName}</strong> (${customer.email || "keine E-Mail"}, Kunde ${customerId}) hat gerade das Setup-Formular ausgefüllt, aber die automatische KI-Closer-Einrichtung ist fehlgeschlagen.</p>
+<p>Fehler: <code>${escapeHtml(String(e))}</code></p>
+<p>Bitte melde dich manuell beim Kunden.</p>`
+      );
       return jsonResponse(
         { ok: true, voice, closerError: String(e) },
         200,
@@ -1288,6 +1302,18 @@ async function sendResendEmail(env, { to, subject, html }) {
   return res.json();
 }
 
+// Best-effort "something broke during a purchase/setup" alert to the
+// founder — every call site is already inside a catch block, so this must
+// never itself throw, or the original error handling would break.
+async function notifyFounderOfIssue(env, subject, html) {
+  if (!env.FOUNDER_EMAIL || !env.RESEND_API_KEY) return;
+  try {
+    await sendResendEmail(env, { to: env.FOUNDER_EMAIL, subject, html });
+  } catch (e) {
+    console.error("Founder issue notification failed to send:", e);
+  }
+}
+
 async function handleAppointmentBooking(request, env, customerId, product) {
   if (!env.RESEND_API_KEY) {
     return new Response(
@@ -1817,88 +1843,109 @@ async function handleStripeWebhook(request, env) {
     const stripeCustomerId = session.customer || null;
     const subscriptionId = session.subscription || null;
 
-    // Which products were bought is set as comma-separated metadata on the
-    // Stripe Payment Link (e.g. "chat_agent,content_agent"). Falls back to
-    // the original single-product chat agent for older/unconfigured links.
-    const productsRaw = session.metadata?.products || PRODUCT_CHAT;
-    const purchasedProducts = productsRaw
-      .split(",")
-      .map((p) => p.trim())
-      .filter(Boolean);
+    try {
+      // Which products were bought is set as comma-separated metadata on the
+      // Stripe Payment Link (e.g. "chat_agent,content_agent"). Falls back to
+      // the original single-product chat agent for older/unconfigured links.
+      const productsRaw = session.metadata?.products || PRODUCT_CHAT;
+      const purchasedProducts = productsRaw
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
 
-    if (!env.CONTENT_KV) {
-      return new Response("ok", { status: 200 });
-    }
-
-    // Look up by email first: a returning customer buying a second product
-    // keeps the SAME customerId and simply gains the new product(s), instead
-    // of getting a disconnected second account.
-    const existingCustomerId = await findCustomerIdByEmail(env, email);
-    const isNewCustomer = !existingCustomerId;
-    const customerId = existingCustomerId || generateCustomerId();
-    const customer = (existingCustomerId && (await getCustomer(env, existingCustomerId))) || {
-      email,
-      name,
-      companyName: name || "dein Unternehmen",
-      productSources: {},
-      createdAt: new Date().toISOString(),
-    };
-
-    customer.email = email || customer.email;
-    customer.name = customer.name || name;
-    customer.companyName = customer.companyName || name || "dein Unternehmen";
-    customer.stripeSessionId = session.id;
-    if (stripeCustomerId) customer.stripeCustomerId = stripeCustomerId;
-
-    customer.productSources = customer.productSources || {};
-    const paymentIntentId = session.payment_intent || null;
-    for (const product of purchasedProducts) {
-      customer.productSources[product] = subscriptionId
-        ? { type: "subscription", subscriptionId }
-        : { type: "one_time", paymentIntentId };
-    }
-    recomputeCustomerProducts(customer);
-
-    await saveCustomer(env, customerId, customer);
-    await indexCustomerEmail(env, email, customerId);
-    if (stripeCustomerId) await indexStripeCustomer(env, stripeCustomerId, customerId);
-
-    // A one-time purchase (e.g. KI Closer's €6000 build) still carries real
-    // ongoing per-minute call costs — save the card used at checkout as the
-    // customer's default so future overage can be invoiced automatically
-    // instead of relying on a payment method that was never attached.
-    if (!subscriptionId && stripeCustomerId && paymentIntentId && env.STRIPE_SECRET_KEY) {
-      try {
-        const pi = await stripeApi(env, `/payment_intents/${paymentIntentId}`, "GET");
-        if (pi.payment_method) {
-          await stripeApi(env, `/customers/${stripeCustomerId}`, "POST", {
-            "invoice_settings[default_payment_method]": pi.payment_method,
-          });
-        }
-      } catch (e) {
-        console.error("Failed to save default payment method for future overage billing:", e);
+      if (!env.CONTENT_KV) {
+        return new Response("ok", { status: 200 });
       }
-    }
 
-    const workerOrigin = new URL(request.url).origin;
-    const sections = buildCustomerAccessSections(customer, customerId, workerOrigin);
+      // Look up by email first: a returning customer buying a second product
+      // keeps the SAME customerId and simply gains the new product(s), instead
+      // of getting a disconnected second account.
+      const existingCustomerId = await findCustomerIdByEmail(env, email);
+      const isNewCustomer = !existingCustomerId;
+      const customerId = existingCustomerId || generateCustomerId();
+      const customer = (existingCustomerId && (await getCustomer(env, existingCustomerId))) || {
+        email,
+        name,
+        companyName: name || "dein Unternehmen",
+        productSources: {},
+        createdAt: new Date().toISOString(),
+      };
 
-    if (email && env.RESEND_API_KEY) {
-      try {
-        await sendResendEmail(env, {
-          to: email,
-          subject: isNewCustomer
-            ? "Willkommen bei Monovri AI 🎉 — deine Agenten sind startklar"
-            : "Neues Produkt freigeschaltet 🎉 — deine aktuellen Monovri AI Zugänge",
-          html: `<p>Hi ${name || "there"},</p>
-<p>${isNewCustomer ? "Danke für dein Abo bei <strong>Monovri AI</strong>! Deine Zahlung ist erfolgreich eingegangen." : "Danke für deinen weiteren Einkauf bei <strong>Monovri AI</strong>! Hier sind alle deine aktuellen Zugänge:"}</p>
+      customer.email = email || customer.email;
+      customer.name = customer.name || name;
+      customer.companyName = customer.companyName || name || "dein Unternehmen";
+      customer.stripeSessionId = session.id;
+      if (stripeCustomerId) customer.stripeCustomerId = stripeCustomerId;
+
+      customer.productSources = customer.productSources || {};
+      const paymentIntentId = session.payment_intent || null;
+      for (const product of purchasedProducts) {
+        customer.productSources[product] = subscriptionId
+          ? { type: "subscription", subscriptionId }
+          : { type: "one_time", paymentIntentId };
+      }
+      recomputeCustomerProducts(customer);
+
+      await saveCustomer(env, customerId, customer);
+      await indexCustomerEmail(env, email, customerId);
+      if (stripeCustomerId) await indexStripeCustomer(env, stripeCustomerId, customerId);
+
+      // A one-time purchase (e.g. KI Closer's €6000 build) still carries real
+      // ongoing per-minute call costs — save the card used at checkout as the
+      // customer's default so future overage can be invoiced automatically
+      // instead of relying on a payment method that was never attached.
+      if (!subscriptionId && stripeCustomerId && paymentIntentId && env.STRIPE_SECRET_KEY) {
+        try {
+          const pi = await stripeApi(env, `/payment_intents/${paymentIntentId}`, "GET");
+          if (pi.payment_method) {
+            await stripeApi(env, `/customers/${stripeCustomerId}`, "POST", {
+              "invoice_settings[default_payment_method]": pi.payment_method,
+            });
+          }
+        } catch (e) {
+          console.error("Failed to save default payment method for future overage billing:", e);
+        }
+      }
+
+      const workerOrigin = new URL(request.url).origin;
+      const sections = buildCustomerAccessSections(customer, customerId, workerOrigin);
+
+      if (email && env.RESEND_API_KEY) {
+        try {
+          await sendResendEmail(env, {
+            to: email,
+            subject: isNewCustomer
+              ? "Willkommen bei Monovri AI 🎉 — deine Agenten sind startklar"
+              : "Neues Produkt freigeschaltet 🎉 — deine aktuellen Monovri AI Zugänge",
+            html: `<p>Hi ${name || "there"},</p>
+<p>${isNewCustomer ? `Danke für ${subscriptionId ? "dein Abo" : "deinen Kauf"} bei <strong>Monovri AI</strong>! Deine Zahlung ist erfolgreich eingegangen.` : "Danke für deinen weiteren Einkauf bei <strong>Monovri AI</strong>! Hier sind alle deine aktuellen Zugänge:"}</p>
 ${sections.join("\n")}
 <p>Fragen? Einfach auf diese E-Mail antworten.</p>
 <p>— Monovri AI</p>`,
-        });
-      } catch (e) {
-        console.error("Resend send failed:", e);
+          });
+        } catch (e) {
+          console.error("Resend send failed:", e);
+          await notifyFounderOfIssue(
+            env,
+            `⚠️ Willkommensmail konnte nicht gesendet werden: ${customer.companyName}`,
+            `<p><strong>${customer.companyName}</strong> (${email || "keine E-Mail"}, Kunde ${customerId}) hat gerade ${purchasedProducts.join(", ")} gekauft, aber die Willkommensmail mit den Zugangsdaten konnte nicht zugestellt werden.</p>
+<p>Fehler: <code>${escapeHtml(String(e))}</code></p>
+<p>Bitte melde dich manuell beim Kunden und schick ihm seinen Setup-Link: ${SITE_ORIGIN}/setup.html?customer=${customerId}</p>`
+          );
+        }
       }
+    } catch (e) {
+      console.error("checkout.session.completed handling failed:", e);
+      await notifyFounderOfIssue(
+        env,
+        `🚨 Kauf konnte nicht verarbeitet werden (${email || "unbekannte E-Mail"})`,
+        `<p>Ein Kauf ist bei Stripe eingegangen, konnte aber nicht vollständig verarbeitet werden (Kunde/Zugänge evtl. unvollständig angelegt).</p>
+<p>Stripe Session: <code>${escapeHtml(session.id || "?")}</code><br>
+E-Mail: ${escapeHtml(email || "unbekannt")}<br>
+Produkte (Metadaten): ${escapeHtml(session.metadata?.products || "?")}</p>
+<p>Fehler: <code>${escapeHtml(String(e))}</code></p>
+<p>Bitte manuell in Stripe und im Worker-KV prüfen und dich beim Kunden melden.</p>`
+      );
     }
   }
 
