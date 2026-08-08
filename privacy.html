@@ -146,22 +146,25 @@ footer{border-top:1px solid var(--line);padding:40px 32px}
     <section class="legal-sec">
       <h2><span class="num">1.</span> Verantwortlicher</h2>
       <p>Verantwortlicher für die Datenverarbeitung auf dieser Website im Sinne der Datenschutz-Grundverordnung (DSGVO) ist:</p>
-      <p>Monovri AI<br>Inhaber: <span style="color:var(--gold)">[NAME]</span><br><span style="color:var(--gold)">[ADRESSE]</span><br>E-Mail: <a href="mailto:support@monovriai.com">support@monovriai.com</a></p>
+      <p>Monovri AI<br>Inhaber: Mohamed Ali Manai<br>Rudolf-Breitscheid-Straße 12D, 76189 Karlsruhe<br>E-Mail: <a href="mailto:support@monovriai.com">support@monovriai.com</a></p>
     </section>
 
     <section class="legal-sec">
       <h2><span class="num">2.</span> Welche Daten wir erheben</h2>
-      <p>Wir erheben personenbezogene Daten nur in dem Umfang, wie es für die Bereitstellung einer funktionsfähigen Website sowie unserer Inhalte und Leistungen erforderlich ist. Konkret erheben wir:</p>
+      <p>Wir unterscheiden zwei Situationen: (a) den Besuch dieser Website und die Kontaktaufnahme mit uns, und (b) die Nutzung unserer KI-Produkte (Chat-Agent, Content-Automatisierung, Kundenservice Co-Pilot, Voice-Agent, KI Closer) durch unsere Geschäftskunden.</p>
+      <p><strong>Website-Besuch &amp; Kontaktaufnahme:</strong></p>
       <ul>
-        <li>Daten, die Sie uns freiwillig über unser Kontaktformular, per E-Mail oder per WhatsApp mitteilen (z. B. Name, E-Mail-Adresse, Nachrichteninhalt)</li>
+        <li>Daten, die Sie uns freiwillig über unser Kontaktformular, den Chat-Assistenten, per E-Mail oder per WhatsApp mitteilen (z. B. Name, E-Mail-Adresse, Nachrichteninhalt)</li>
+        <li>Kaufdaten bei einer Bestellung über Stripe (z. B. E-Mail, Name, Rechnungsadresse) — siehe Abschnitt 6</li>
         <li>Technisch notwendige Cookies zur korrekten Darstellung der Website (siehe Cookie-Hinweis)</li>
       </ul>
       <p>Wir setzen keine Tracking-Tools, keine Analyse-Cookies und keine Werbe-Cookies ein.</p>
+      <p><strong>Nutzung unserer KI-Produkte durch Geschäftskunden:</strong> Wenn ein Unternehmen eines unserer Produkte bucht, verarbeiten wir in dessen Auftrag auch Daten von dessen eigenen Website-Besuchern, Anrufern bzw. Kunden — z. B. Chat-Nachrichten, Anrufinhalte/-transkripte oder Support-Anfragen. Für diese Verarbeitung handeln wir als Auftragsverarbeiter im Sinne von Art. 28 DSGVO für unseren jeweiligen Geschäftskunden, nicht als eigenständig Verantwortlicher — siehe Abschnitt 7.</p>
     </section>
 
     <section class="legal-sec">
       <h2><span class="num">3.</span> Zweck der Verarbeitung</h2>
-      <p>Die von Ihnen bereitgestellten Daten werden ausschließlich zur Bearbeitung Ihrer Anfrage, zur Kommunikation mit Ihnen sowie zur Anbahnung und Durchführung einer möglichen Zusammenarbeit verarbeitet. Eine Weitergabe an Dritte zu Werbezwecken findet nicht statt.</p>
+      <p>Die von Ihnen bereitgestellten Daten werden zur Bearbeitung Ihrer Anfrage, zur Kommunikation mit Ihnen, zur Vertragsabwicklung sowie zum technischen Betrieb der gebuchten KI-Produkte verarbeitet. Eine Weitergabe an Dritte zu Werbezwecken findet nicht statt.</p>
     </section>
 
     <section class="legal-sec">
@@ -184,17 +187,43 @@ footer{border-top:1px solid var(--line);padding:40px 32px}
     </section>
 
     <section class="legal-sec">
-      <h2><span class="num">6.</span> Hosting</h2>
-      <p>Diese Website wird über GitHub Pages gehostet, einen Dienst der GitHub, Inc. (bzw. deren europäischer Vertragspartner). Beim Aufruf dieser Website werden durch den Hosting-Anbieter automatisch technische Verbindungsdaten (z. B. IP-Adresse, Datum und Uhrzeit des Zugriffs) verarbeitet, die zum Betrieb und zur Sicherheit der Infrastruktur erforderlich sind. Die Server können sich sowohl innerhalb der EU als auch in den USA befinden. Weitere Informationen finden Sie in der Datenschutzerklärung von GitHub.</p>
+      <h2><span class="num">6.</span> Eingesetzte Auftragsverarbeiter &amp; Dienste</h2>
+      <p>Zum Betrieb dieser Website und unserer KI-Produkte setzen wir folgende Dienste als Auftragsverarbeiter bzw. eigenständig Verantwortliche ein. Mit allen Anbietern, bei denen dies erforderlich ist, bestehen Auftragsverarbeitungsverträge bzw. gelten deren Standardvertragsklauseln:</p>
+      <ul>
+        <li><strong>Cloudflare, Inc.</strong> (USA/EU) — Hosting der Backend-Infrastruktur (Workers, Workers AI), Bereitstellung der Chat-/Content-/Kundenservice-Funktionen</li>
+        <li><strong>GitHub, Inc.</strong> (USA) — Hosting dieser Website (GitHub Pages)</li>
+        <li><strong>Stripe Payments Europe, Ltd.</strong> (Irland/USA) — Zahlungsabwicklung, Rechnungsstellung</li>
+        <li><strong>Resend / Amazon Web Services</strong> (EU-Region) — Versand transaktionaler E-Mails (z. B. Willkommens-, Bestätigungs- und Benachrichtigungs-Mails)</li>
+        <li><strong>Vapi Inc.</strong> (USA) — Orchestrierung des Voice-Agent/KI-Closer-Telefonsystems, inkl. Weiterleitung an:
+          <ul>
+            <li><strong>OpenAI, L.L.C.</strong> (USA) — Sprachverständnis/-generierung (GPT-Modelle)</li>
+            <li><strong>ElevenLabs Inc.</strong> (USA) — Sprachsynthese (Text-zu-Sprache)</li>
+            <li><strong>Deepgram, Inc.</strong> (USA) — Spracherkennung (Sprache-zu-Text)</li>
+          </ul>
+        </li>
+        <li><strong>Cal.com, Inc.</strong> (USA) — nur falls vom jeweiligen Geschäftskunden für die automatische Terminbuchung verbunden</li>
+        <li><strong>WhatsApp Ireland Limited / Meta Platforms Ireland Limited</strong> — bei Kontaktaufnahme über den WhatsApp-Button (siehe Abschnitt 9)</li>
+      </ul>
+      <p>Beim Aufruf dieser Website werden durch den Hosting-Anbieter automatisch technische Verbindungsdaten (z. B. IP-Adresse, Datum und Uhrzeit des Zugriffs) verarbeitet, die zum Betrieb und zur Sicherheit der Infrastruktur erforderlich sind.</p>
     </section>
 
     <section class="legal-sec">
-      <h2><span class="num">7.</span> Kommunikation über WhatsApp</h2>
+      <h2><span class="num">7.</span> Datenübermittlung in Drittländer</h2>
+      <p>Ein Teil der oben genannten Anbieter (u. a. Cloudflare, GitHub, OpenAI, ElevenLabs, Deepgram, Vapi, Cal.com, Meta/WhatsApp) verarbeitet Daten (auch) in den USA oder anderen Ländern außerhalb der EU/des EWR. Die Übermittlung erfolgt auf Grundlage geeigneter Garantien gemäß Art. 46 DSGVO, insbesondere EU-Standardvertragsklauseln (Standard Contractual Clauses) bzw., soweit anwendbar, im Rahmen des EU-U.S. Data Privacy Framework. Eine Kopie der jeweiligen Garantien kann bei uns angefordert werden.</p>
+    </section>
+
+    <section class="legal-sec" id="avv">
+      <h2><span class="num">8.</span> Auftragsverarbeitung für Geschäftskunden (B2B)</h2>
+      <p>Bucht ein Unternehmen eines unserer KI-Produkte (Chat-Agent, Content-Automatisierung, Kundenservice Co-Pilot, Voice-Agent, KI Closer), verarbeiten wir dabei in dessen Auftrag personenbezogene Daten von dessen eigenen Kunden/Website-Besuchern/Anrufern (z. B. Chat-Verläufe, Anruftranskripte, Support-Nachrichten). Für diese Verarbeitung schließen wir mit unseren Geschäftskunden auf Anfrage einen Auftragsverarbeitungsvertrag (AVV) gemäß Art. 28 DSGVO ab, der die eingesetzten Unterauftragsverarbeiter aus Abschnitt 6 mit einbezieht. Anfragen hierzu bitte an <a href="mailto:support@monovriai.com">support@monovriai.com</a>.</p>
+    </section>
+
+    <section class="legal-sec">
+      <h2><span class="num">9.</span> Kommunikation über WhatsApp</h2>
       <p>Wenn Sie uns über den WhatsApp-Button kontaktieren, wechseln Sie auf den Messenger-Dienst WhatsApp der Meta Platforms Ireland Limited bzw. WhatsApp Ireland Limited. Für die Verarbeitung Ihrer Daten innerhalb von WhatsApp gilt die Datenschutzerklärung von Meta/WhatsApp, auf die wir keinen Einfluss haben. Wir empfehlen, deren Datenschutzhinweise vor Nutzung zu lesen.</p>
     </section>
 
     <section class="legal-sec">
-      <h2><span class="num">8.</span> Keine Analyse- oder Werbe-Tools</h2>
+      <h2><span class="num">10.</span> Keine Analyse- oder Werbe-Tools</h2>
       <p>Diese Website verwendet kein Google Analytics, keine vergleichbaren Analyse-Dienste und keine Werbe-Cookies von Drittanbietern. Es findet kein Tracking Ihres Nutzungsverhaltens statt.</p>
     </section>
   </div>
@@ -206,6 +235,7 @@ footer{border-top:1px solid var(--line);padding:40px 32px}
     <div class="ft-links">
       <a href="index.html">Startseite</a>
       <a href="imprint.html">Impressum</a>
+      <a href="agb.html">AGB</a>
     </div>
   </div>
 </footer>
