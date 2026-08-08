@@ -1047,11 +1047,11 @@ async function handleCustomerKundenserviceChat(request, env, cors, customerId) {
 
 const VAPI_VOICE_ID_SARAH = "EXAVITQu4vr4xnSDxMaL"; // ElevenLabs "Sarah" — matches the voice validated manually for Monovri's own agent.
 
-// Vapi's free "vapi" phone number provider only issues US numbers and
+// Fallback for non-German customers (and German ones until Twilio is set
+// up): Vapi's free "vapi" phone number provider only issues US numbers and
 // requires a desired area code (or a SIP URI) — there's no "just give me a
-// number" option. This is a US number regardless of which area code is
-// picked; getting real German/EU numbers per customer would need a BYO
-// provider (e.g. Twilio) with a purchased local number instead.
+// number" option. See provisionPhoneNumberForCustomer() for the actual
+// German-vs-everyone-else routing logic.
 const VAPI_NUMBER_AREA_CODE = "415";
 
 function customerVoiceSystemPrompt(customer) {
@@ -1113,6 +1113,93 @@ async function stripeApi(env, path, method, params) {
     throw new Error(`Stripe API ${method} ${path} failed (${res.status}): ${text}`);
   }
   return data;
+}
+
+async function twilioApi(env, path, method, params) {
+  const form = new URLSearchParams();
+  for (const [k, v] of Object.entries(params || {})) {
+    if (v !== undefined && v !== null) form.append(k, String(v));
+  }
+  const auth = btoa(`${env.TWILIO_ACCOUNT_SID}:${env.TWILIO_AUTH_TOKEN}`);
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${env.TWILIO_ACCOUNT_SID}${path}`;
+  const res = await fetch(method === "GET" && form.toString() ? `${url}?${form.toString()}` : url, {
+    method,
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: method === "GET" ? undefined : form.toString(),
+  });
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { raw: text };
+  }
+  if (!res.ok) {
+    throw new Error(`Twilio API ${method} ${path} failed (${res.status}): ${text}`);
+  }
+  return data;
+}
+
+async function provisionGermanTwilioNumber(env) {
+  const available = await twilioApi(env, "/AvailablePhoneNumbers/DE/Local.json", "GET", { Limit: 1 });
+  const candidate = available?.available_phone_numbers?.[0];
+  if (!candidate) {
+    throw new Error("No available German Twilio numbers found");
+  }
+  const purchased = await twilioApi(env, "/IncomingPhoneNumbers.json", "POST", {
+    PhoneNumber: candidate.phone_number,
+  });
+  return purchased.phone_number; // E.164, e.g. "+4930..."
+}
+
+async function importTwilioNumberToVapi(env, phoneNumber, assistantId) {
+  return vapiApi(env, "/phone-number", "POST", {
+    provider: "twilio",
+    number: phoneNumber,
+    twilioAccountSid: env.TWILIO_ACCOUNT_SID,
+    twilioAuthToken: env.TWILIO_AUTH_TOKEN,
+    assistantId,
+  });
+}
+
+// German customers get a real German Twilio number (once Twilio is
+// configured) so callers/leads see a familiar local number; everyone else
+// gets Vapi's free US number. Falls back safely (and tells the founder) if
+// Twilio isn't set up yet or a purchase fails, instead of blocking setup.
+async function provisionPhoneNumberForCustomer(env, customer, assistantId) {
+  const wantsGermanNumber = customer.country === "DE";
+  const twilioReady = !!(env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN);
+
+  if (wantsGermanNumber && twilioReady) {
+    try {
+      const germanNumber = await provisionGermanTwilioNumber(env);
+      return await importTwilioNumberToVapi(env, germanNumber, assistantId);
+    } catch (e) {
+      console.error("German Twilio number provisioning failed, falling back to US number:", e);
+      await notifyFounderOfIssue(
+        env,
+        `⚠️ Deutsche Nummer für ${customer.companyName} fehlgeschlagen`,
+        `<p>Twilio-Fehler beim Kauf einer deutschen Nummer: <code>${escapeHtml(String(e))}</code></p>
+<p>Der Kunde hat stattdessen vorerst eine US-Nummer bekommen. Bitte manuell prüfen und ggf. später auf eine deutsche Nummer umstellen.</p>`
+      );
+    }
+  } else if (wantsGermanNumber && !twilioReady) {
+    await notifyFounderOfIssue(
+      env,
+      `📞 Deutscher Kunde ohne Twilio-Setup: ${customer.companyName}`,
+      `<p><strong>${customer.companyName}</strong> ist aus Deutschland, aber Twilio ist noch nicht eingerichtet (TWILIO_ACCOUNT_SID/TWILIO_AUTH_TOKEN fehlen als Cloudflare-Secrets). Der Kunde hat vorerst eine US-Nummer bekommen.</p>
+<p>Bitte Twilio einrichten, sobald möglich, und die Nummer für diesen Kunden danach manuell auf eine deutsche umstellen.</p>`
+    );
+  }
+
+  return vapiApi(env, "/phone-number", "POST", {
+    provider: "vapi",
+    numberDesiredAreaCode: VAPI_NUMBER_AREA_CODE,
+    assistantId,
+  });
 }
 
 const CALCOM_API_BASE = "https://api.cal.com/v1";
@@ -1240,11 +1327,7 @@ async function provisionVoiceAgent(env, customer, customerId, workerOrigin) {
     serverMessages: ["end-of-call-report"],
   });
 
-  const phoneNumber = await vapiApi(env, "/phone-number", "POST", {
-    provider: "vapi",
-    numberDesiredAreaCode: VAPI_NUMBER_AREA_CODE,
-    assistantId: assistant.id,
-  });
+  const phoneNumber = await provisionPhoneNumberForCustomer(env, customer, assistant.id);
 
   return {
     vapiAssistantId: assistant.id,
@@ -1371,11 +1454,7 @@ async function provisionCloserAgent(env, customer, customerId, workerOrigin) {
     serverMessages: ["end-of-call-report"],
   });
 
-  const phoneNumber = await vapiApi(env, "/phone-number", "POST", {
-    provider: "vapi",
-    numberDesiredAreaCode: VAPI_NUMBER_AREA_CODE,
-    assistantId: assistant.id,
-  });
+  const phoneNumber = await provisionPhoneNumberForCustomer(env, customer, assistant.id);
 
   return {
     closerAssistantId: assistant.id,
@@ -2119,6 +2198,10 @@ async function handleStripeWebhook(request, env) {
       customer.companyName = customer.companyName || name || "dein Unternehmen";
       customer.stripeSessionId = session.id;
       if (stripeCustomerId) customer.stripeCustomerId = stripeCustomerId;
+      // Billing country drives phone-number provisioning (DE -> real German
+      // Twilio number once configured, everything else -> Vapi's US number).
+      const billingCountry = session.customer_details?.address?.country || null;
+      if (billingCountry) customer.country = billingCountry;
 
       customer.productSources = customer.productSources || {};
       const paymentIntentId = session.payment_intent || null;
