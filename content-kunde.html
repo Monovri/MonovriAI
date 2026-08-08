@@ -107,9 +107,22 @@ function liCard(post) {
   return card;
 }
 
+function reelCard(post) {
+  var card = document.createElement('div');
+  card.className = 'card';
+  var full = 'HOOK: ' + post.hook + '\n\n' + post.script + '\n\nCTA: ' + post.cta;
+  card.innerHTML =
+    '<div class="hook">🪝 ' + esc(post.hook || '') + '</div>' +
+    '<div class="body-text">' + esc(post.script || '') + '</div>' +
+    '<div class="hashtags">CTA: ' + esc(post.cta || '') + '</div>' +
+    '<button class="copy">📋 Kopieren</button>';
+  card.querySelector('.copy').addEventListener('click', function (e) { copyToClipboard(full, e.target); });
+  return card;
+}
+
 function render(data) {
   lastData = data;
-  dateEl.textContent = data.date ? ('Content für ' + data.date) : '';
+  dateEl.textContent = data.weekOf ? ('Content für die Woche vom ' + data.weekOf) : '';
 
   if (data.raw) {
     langToggle.style.display = 'none';
@@ -138,8 +151,16 @@ function renderLang(lang) {
   if (!lastData || lastData.raw) return;
   contentEl.innerHTML = '';
 
+  var reelList = (lastData.reels && lastData.reels[lang]) || [];
   var igList = (lastData.instagram && lastData.instagram[lang]) || [];
   var liList = (lastData.linkedin && lastData.linkedin[lang]) || [];
+
+  if (reelList.length) {
+    var reelHeading = document.createElement('h2');
+    reelHeading.innerHTML = '🎬 Reels / TikTok';
+    contentEl.appendChild(reelHeading);
+    reelList.forEach(function (p) { contentEl.appendChild(reelCard(p)); });
+  }
 
   var igHeading = document.createElement('h2');
   igHeading.innerHTML = '📸 Instagram';
