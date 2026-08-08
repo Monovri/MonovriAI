@@ -840,6 +840,80 @@ async function generateWeeklyContentForAllCustomers(env) {
   } while (cursor);
 }
 
+// A customer who paid but never finished setup.html gets zero value from
+// what they bought — that's exactly the kind of silent, avoidable churn
+// that kills word-of-mouth growth. Nudge them (and tell the founder) before
+// they quietly give up and cancel.
+const SETUP_REMINDER_STAGES = [
+  { afterDays: 3, key: "day3" },
+  { afterDays: 7, key: "day7" },
+];
+
+async function sendSetupReminderEmail(env, customer, customerId, stageKey) {
+  const to = customer.email;
+  if (!to || !env.RESEND_API_KEY) return;
+
+  const setupLink = `${SITE_ORIGIN}/setup.html?customer=${customerId}`;
+  const html =
+    stageKey === "day3"
+      ? `<p>Hi ${customer.name || ""},</p>
+<p>Kurze Erinnerung: Dein Setup-Formular wartet noch auf ein paar Angaben, damit deine Monovri-AI-Produkte zu deinem Business passen und live gehen — dauert nur 2 Minuten:</p>
+<p><a href="${setupLink}">Jetzt einrichten →</a></p>
+<p>Fragen? Einfach auf diese E-Mail antworten.</p>
+<p>— Monovri AI</p>`
+      : `<p>Hi ${customer.name || ""},</p>
+<p>Dein Setup steht immer noch aus. Falls irgendetwas unklar ist oder du Hilfe brauchst, antworte einfach auf diese Mail oder schreib uns direkt: <a href="https://wa.me/491608359987" target="_blank" rel="noopener">WhatsApp</a> — wir helfen dir gerne persönlich weiter.</p>
+<p><a href="${setupLink}">Jetzt einrichten →</a></p>
+<p>— Monovri AI</p>`;
+
+  await sendResendEmail(env, {
+    to,
+    subject: stageKey === "day3" ? "👋 Kurze Erinnerung: Dein Setup wartet noch" : "🙋 Brauchst du Hilfe beim Einrichten?",
+    html,
+  });
+
+  await notifyFounderOfIssue(
+    env,
+    `📋 Kunde hat Setup nach ${stageKey === "day3" ? "3" : "7"} Tagen noch nicht abgeschlossen: ${customer.companyName}`,
+    `<p><strong>${customer.companyName}</strong> (${customer.email}) hat vor ${stageKey === "day3" ? "3+" : "7+"} Tagen gekauft, aber das Setup-Formular nie ausgefüllt.</p>
+<p>${stageKey === "day7" ? "Empfehlung: persönlich melden (Anruf/WhatsApp) — Risiko für stille Unzufriedenheit und Kündigung." : "Eine automatische Erinnerung wurde gerade an den Kunden geschickt."}</p>
+<p>Kunde: ${customerId}</p>`
+  );
+}
+
+async function checkStaleSetups(env) {
+  if (!env.CONTENT_KV) return;
+  const now = Date.now();
+
+  let cursor;
+  do {
+    const page = await env.CONTENT_KV.list({ prefix: CUSTOMER_KV_PREFIX, cursor });
+    cursor = page.cursor;
+
+    for (const key of page.keys) {
+      const customerId = key.name.slice(CUSTOMER_KV_PREFIX.length);
+      const customer = await getCustomer(env, customerId);
+      if (!customer?.active || customer.profile || !customer.createdAt) continue;
+
+      const ageDays = (now - new Date(customer.createdAt).getTime()) / (24 * 60 * 60 * 1000);
+      const sentStages = customer.setupReminderStages || [];
+
+      for (const stage of SETUP_REMINDER_STAGES) {
+        if (ageDays >= stage.afterDays && !sentStages.includes(stage.key)) {
+          try {
+            await sendSetupReminderEmail(env, customer, customerId, stage.key);
+            customer.setupReminderStages = [...sentStages, stage.key];
+            await saveCustomer(env, customerId, customer);
+          } catch (e) {
+            console.error(`Setup reminder failed for ${customerId} (${stage.key}):`, e);
+          }
+          break;
+        }
+      }
+    }
+  } while (cursor);
+}
+
 async function handleGetCustomerContent(env, cors, customerId) {
   const customer = await getCustomer(env, customerId);
   if (!customer || !customer.active || !customer.products?.includes(PRODUCT_CONTENT)) {
@@ -2369,5 +2443,6 @@ export default {
     ctx.waitUntil(generateCreatorContent(env));
     ctx.waitUntil(runOverageBilling(env));
     ctx.waitUntil(generateWeeklyContentForAllCustomers(env));
+    ctx.waitUntil(checkStaleSetups(env));
   },
 };
